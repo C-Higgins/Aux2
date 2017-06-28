@@ -1,0 +1,42 @@
+{
+  "rooms": {
+	//Read: true.
+	// Everyone can see the names of rooms
+	"$rid": {
+	  "room name": string,
+	  "private": boolean
+	}
+  },
+  "room_users": {
+	// Users in the room can see all users in the room
+	"$rid": {
+	  //read: data.child(auth.uid).exists()
+	  "$uid": true,
+	  "$uid": true
+	}
+  },
+  "room_data": {
+	// Users in the room can see all room data
+	"$rid": {
+	  //read: root.child('room_users/'+$rid+'/'+auth.uid).exists()
+	  "track_playing": boolean,
+	  "current_track": string,
+	  "songs": {
+		"$sid": {
+		  "title": string,
+		  "url": string,
+		  "length": integer,
+		  "uploader": string
+		}
+	  }
+	}
+  },
+  "users": {
+	"$uid": {
+	  "name": string,
+	  "rooms": {
+		"$rid": true
+	  }
+	}
+  }
+}

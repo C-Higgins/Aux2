@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
-import logo from '../logo.svg';
 import '../css/App.css';
+import {db} from '../index.js'
+import Lobby from './Lobby.js'
 
 class App extends Component {
 
@@ -10,9 +11,17 @@ class App extends Component {
 	}
 
 
+	componentWillMount() {
+
+	}
+
+	addUser(obj) {
+		db.child('users').set(obj)
+	}
+
 	render() {
 		return (
-			<div>start</div>
+			<Lobby />
 		);
 	}
 }

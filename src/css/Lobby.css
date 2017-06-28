@@ -1,0 +1,109 @@
+#wrapper {
+	margin: auto;
+	width:  1024px;
+}
+
+#header-color {
+	height:           120px;
+	width:            100%;
+	position:         fixed;
+	top:              0;
+	z-index:          1;
+	background-color: #560e0e;
+}
+
+#header {
+	height:   120px;
+	width:    100%;
+	position: sticky;
+	top:      0;
+	z-index:  2;
+	overflow: hidden;
+	color:    #eeeeee;
+}
+
+#aux {
+	font:           110px 'Poiret One', sans-serif;
+	line-height:    82px;
+	letter-spacing: -5px;
+	color:          #eeeeee;
+	position:       absolute;
+	bottom:         0;
+
+}
+
+#buttons {
+	display:         flex;
+	flex-direction:  column;
+	justify-content: space-around;
+	height:          100%;
+}
+
+.lobby-button {
+	width:       100px;
+	height:      33px;
+	line-height: 33px;
+	background:  #eeeeee;
+	margin-left: auto;
+	text-align:  center;
+	box-shadow:  0px 3px 10px 0px #555555;
+	font-size:   22px;
+}
+
+#room-container {
+	/*border: 1px solid white;*/
+	margin:          auto;
+	max-width:       1024px;
+	position:        relative;
+	display:         flex;
+	flex-direction:  row;
+	justify-content: space-around;
+	flex-wrap:       wrap;
+}
+
+.room {
+	/*border: 1px dotted blue;*/
+	/*background-color: whitesmoke;*/
+	width:          300px;
+	height:         300px;
+	position:       relative;
+
+	margin:         15px 15px;
+	text-align:     center;
+	display:        flex;
+	flex-direction: column;
+	cursor:         pointer;
+}
+
+.room:hover {
+	outline:          1px solid black;
+	background-color: white;
+}
+
+.room .img-container {
+	width:  100%;
+	height: 150px;
+}
+
+img {
+	max-width: 100%;
+	height:    100%;
+}
+
+.room-name {
+	font-size:      1.5em;
+	margin:         5px auto auto auto;
+	width:          90%;
+	padding-bottom: 5px;
+	border-bottom:  1px solid black;
+	font-family:    'Playfair Display', serif;
+}
+
+.room-info {
+	padding:    5px;
+	margin-top: auto;
+	font-size:  14px;
+}
+
+
+
