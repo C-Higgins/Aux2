@@ -21,7 +21,7 @@ class App extends Component {
 
 	render() {
 		return (
-			<Lobby />
+			<Lobby {...this.props}/>
 		);
 	}
 }

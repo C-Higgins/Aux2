@@ -6,6 +6,13 @@ class Lobby extends Component {
 
 
 	render() {
+		const roomCards = this.props.rooms.map(r => {
+			return <RoomCard {...r}/>
+		})
+
+
+
+
 		return (
 			<div id="wrapper">
 				<div id="header">
@@ -17,16 +24,7 @@ class Lobby extends Component {
 
 				</div>
 				<div id="room-container">
-					<RoomCard />
-					<RoomCard />
-					<RoomCard />
-					<RoomCard />
-					<RoomCard />
-					<RoomCard />
-					<RoomCard />
-					<RoomCard />
-					<RoomCard />
-					<RoomCard />
+					{roomCards}
 				</div>
 			</div>
 		)

@@ -15,10 +15,58 @@ var config = {
 firebase.initializeApp(config);
 
 const fb = firebase.database().ref();
-fb.on('value', (snapshot => {
-	const store = snapshot.val()
-	ReactDOM.render(<App {...store}/>, document.getElementById('root'));
-}))
+
+fb.on('value', rooms => {
+	renderApp()
+})
+
+
+async function renderApp() {
+	const rooms = await buildProps()
+	ReactDOM.render(<App rooms={rooms}/>, document.getElementById('root'));
+}
+
+
+async function buildProps() {
+	let users = {}
+	let rooms = {}
+
+
+	return new Promise(resolve => {
+		//join room and room_data, this part is easy
+		//for each user in room_users, join with users
+		//room_users[x][y] = users[y]
+		//join room and users
+		//do this for each room and return the object
+
+		resolve(merged)
+	})
+
+
+}
+
+
+function join(id, paths, cb) {
+	let returnedCount = 0
+	let expectedCount = paths.length
+	let mergedObject = {}
+	return new Promise(resolve => {
+		paths.forEach(p => {
+			fb.child(`${p}/${id}`).on('value',
+				snap => { //success
+					Object.assign(mergedObject, snap.val())
+					if (++returnedCount === expectedCount) {
+						resolve(mergedObject)
+					}
+				},
+				error => { //failure
+					returnedCount = expectedCount + 1
+					resolve(null)
+				})
+		})
+	})
+
+}
 
 registerServiceWorker();
 

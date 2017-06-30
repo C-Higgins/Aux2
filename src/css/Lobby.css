@@ -1,6 +1,6 @@
 #wrapper {
-	margin: auto;
-	width:  1024px;
+	margin:    auto;
+	max-width: 1024px;
 }
 
 #header-color {
@@ -37,6 +37,7 @@
 	flex-direction:  column;
 	justify-content: space-around;
 	height:          100%;
+	margin-right:    10px;
 }
 
 .lobby-button {
