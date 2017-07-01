@@ -5,13 +5,10 @@ import RoomCard from './RoomCard.js'
 class Lobby extends Component {
 
 
-	render() {
+    render() {
 		const roomCards = this.props.rooms.map(r => {
 			return <RoomCard {...r}/>
 		})
-
-
-
 
 		return (
 			<div id="wrapper">
