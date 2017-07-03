@@ -1,28 +1,24 @@
 import React, {Component} from 'react';
 import '../css/Lobby.css';
 import RoomCard from './RoomCard.js'
+import Room from './Room.js'
+import {
+	BrowserRouter as Router,
+	Route,
+	Link
+} from 'react-router-dom'
 
 class Lobby extends Component {
 
 
-    render() {
+	render() {
 		const roomCards = this.props.rooms.map(r => {
 			return <RoomCard {...r}/>
 		})
 
 		return (
-			<div id="wrapper">
-				<div id="header">
-					<span id="aux">Aux</span>
-					<div id="buttons">
-						<div id="create-button" className="lobby-button">--></div>
-						<div id="button2" className="lobby-button">--></div>
-					</div>
-
-				</div>
-				<div id="room-container">
-					{roomCards}
-				</div>
+			<div id="room-container">
+				{roomCards}
 			</div>
 		)
 	}
