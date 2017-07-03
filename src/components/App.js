@@ -66,7 +66,7 @@ class App extends Component {
 
 function Header(props) {
 	return <div id="header">
-		<span id="aux">Aux</span>
+		<Link to="/"><span id="aux">Aux</span></Link>
 		<div id="buttons">
 			<div id="create-button" className="lobby-button">--></div>
 			<div id="button2" className="lobby-button">--></div>
