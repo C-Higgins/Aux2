@@ -24,24 +24,23 @@ class Room extends Component {
 				this.setState({nullPage: true})
 			}
 			this.setState(ps => {
-				return {...data.val(), loaded: ps.loaded++}
+				return {...data.val(), loaded: ps.loaded+1}
 			})
 			this.checkDoneLoading()
 		})
 
 		this.fb.child('room_data/' + this.roomID).on('value', data => {
 			this.setState(ps => {
-				return {...data.val(), loaded: ps.loaded++}
+				return {...data.val(), loaded: ps.loaded+1}
 			})
-			this.checkDoneLoading()
+            this.checkDoneLoading()
 		})
 
 		this.fb.child('room_users/' + this.roomID).on('child_added', user => {
 			this.fb.child('users/' + user.getKey()).once('value', userD => {
 				this.setState(ps => {
-					return {users: Object.assign({}, ps.users, {[userD.getKey()]: userD.val()}), loaded: ps.loaded++}
+					return {users: Object.assign({}, ps.users, {[userD.getKey()]: userD.val()})}
 				})
-				this.checkDoneLoading()
 			})
 		})
 
@@ -49,7 +48,7 @@ class Room extends Component {
 
 	checkDoneLoading() {
 		this.setState(ps => {
-			return {loading: ps.loaded === 3} //the number of FB calls
+			return {loading: ps.loaded < 2} //the number of FB calls
 		})
 	}
 
@@ -65,7 +64,7 @@ class Room extends Component {
 		if (this.state.loading) {
 			return <Spinner name="wave" color="#560e0e" fadeIn="half"/>
 		} else if (this.state.nullPage) {
-			return <ErrorPage e={404}/>
+			return <ErrorPage e={404}/> //not the r-router way...
 		} else {
 			return <RoomPage />
 		}
