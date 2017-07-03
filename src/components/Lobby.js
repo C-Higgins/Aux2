@@ -13,11 +13,11 @@ class Lobby extends Component {
 
 	render() {
 		const roomCards = this.props.rooms.map(r => {
-			return <RoomCard {...r}/>
+			return <Link to={r.key} key={r.key}><RoomCard {...r}/></Link>
 		})
 
 		return (
-			<div id="room-container">
+			<div id="rooms-container">
 				{roomCards}
 			</div>
 		)

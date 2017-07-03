@@ -1,0 +1,75 @@
+#room-container {
+	max-width: 1024px;
+	display:   flex;
+	margin:    10px;
+}
+
+#music {
+	width: 100%;
+}
+
+#music #now-playing {
+	height:  35%;
+	display: flex;
+}
+
+#music #now-playing img {
+	height:  100%;
+	padding: 0 10px 10px 0;
+}
+
+#music #now-playing #right {
+	position: relative;
+}
+
+#music #now-playing #right #music-info {
+	padding-top: 20px;
+	font-size:   1.3em;
+}
+
+#music #now-playing #right #controls {
+	bottom:   10px;
+	position: absolute;
+}
+
+#music #queue {
+	background:      white;
+	outline:         1px solid #cccccc;
+	height:          65%;
+	width:           100%;
+	padding:         10px;
+	border-collapse: collapse;
+}
+
+#queueTable {
+	display: table;
+	width:   100%;
+}
+
+#music #queue #queueHeader {
+	display:       table-header-group;
+	width:         100%;
+	border-bottom: 1px solid #cccccc;
+}
+
+#music #queue #queueHeader span, .row span {
+	display: table-cell;
+	padding: 5px;
+}
+
+#queueRows {
+	display: table-row-group;
+}
+
+.row {
+	display: table-row;
+	height:  10px;
+}
+
+#chat {
+	width:       400px;
+	margin-left: 10px;
+	padding:     10px;
+	background:  white;
+	outline:     1px solid #cccccc;
+}
