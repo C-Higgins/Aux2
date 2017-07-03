@@ -68,7 +68,7 @@ function Header(props) {
 	return <div id="header">
 		<Link to="/"><span id="aux">Aux</span></Link>
 		<div id="buttons">
-			<div id="create-button" className="lobby-button">--></div>
+			<div id="create-button" className="lobby-button">---></div>
 			<div id="button2" className="lobby-button">--></div>
 		</div>
 	</div>
