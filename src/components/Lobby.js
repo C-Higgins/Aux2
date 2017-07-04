@@ -1,10 +1,9 @@
 import React, {Component} from 'react';
 import '../css/Lobby.css';
 import RoomCard from './RoomCard.js'
-import Room from './Room.js'
 import {
-	BrowserRouter as Router,
-	Route,
+	// BrowserRouter as Router,
+	// Route,
 	Link
 } from 'react-router-dom'
 
