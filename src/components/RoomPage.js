@@ -1,4 +1,5 @@
 import React from 'react';
+import Chat from './Chat.js'
 function RoomPage(props) {
 	return (
 		<div id="room-container">
@@ -41,9 +42,7 @@ function RoomPage(props) {
 					</div>
 				</div>
 			</div>
-			<div id="chat">
-				chat
-			</div>
+			<Chat messages={props.messages} sendChat={props.sendChat}/>
 		</div>
 	)
 }

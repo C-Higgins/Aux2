@@ -13,9 +13,11 @@ class Room extends Component {
 		this.roomID = props.match.params.roomID
 		this.fb = firebase.database().ref();
 		this.state = {
-			loading: true,
-			loaded:  0
+			loading:  true,
+			loaded:   0,
+			messages: []
 		}
+		this.sendChat = this.sendChat.bind(this)
 	}
 
 	componentWillMount() {
@@ -36,10 +38,17 @@ class Room extends Component {
             this.checkDoneLoading()
 		})
 
-		this.fb.child('room_users/' + this.roomID).on('child_added', user => {
+		this.fb.child('messages/' + this.roomID).on('child_added', data => {
+			this.setState(ps => {
+				return {messages: ps.messages.concat(data.val())}
+			})
+			//this.checkDoneLoading()
+		})
+
+		this.fb.child('room_data/' + this.roomID + '/users').on('child_added', user => {
 			this.fb.child('users/' + user.getKey()).once('value', userD => {
 				this.setState(ps => {
-					return {users: Object.assign({}, ps.users, {[userD.getKey()]: userD.val()})}
+					return {userdata: Object.assign({}, ps.userdata, {[userD.getKey()]: userD.val()})}
 				})
 			})
 		})
@@ -52,12 +61,20 @@ class Room extends Component {
 		})
 	}
 
-
 	componentWillUnmount() {
 		this.fb.child('rooms/' + this.roomID).off()
 		this.fb.child('room_data/' + this.roomID).off()
 		this.fb.child('room_users/' + this.roomID).off()
 		this.fb.off()
+	}
+
+	sendChat(message) {
+		let newMsgRef = firebase.database().ref('messages/' + this.roomID).push()
+		newMsgRef.set({
+			author:  'sendchattest',
+			message: message,
+		})
+
 	}
 
 	render() {
@@ -66,7 +83,7 @@ class Room extends Component {
 		} else if (this.state.nullPage) {
 			return <ErrorPage e={404}/> //not the r-router way...
 		} else {
-			return <RoomPage />
+			return <RoomPage messages={this.state.messages} sendChat={this.sendChat}/>
 		}
 	}
 }

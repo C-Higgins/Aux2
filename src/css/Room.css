@@ -72,4 +72,32 @@
 	padding:     10px;
 	background:  white;
 	outline:     1px solid #cccccc;
+	position:    relative;
+}
+
+#chat-messages {
+	font:       13px 'Noto Sans', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, Sans-Serif;
+	color:      #606060;
+	overflow-y: scroll;
+	position:   absolute;
+	bottom:     60px;
+	top:        0;
+	left:       0;
+	padding:    0 10px;
+}
+
+.message {
+	margin: 7px 0;
+}
+
+#chat textarea {
+	position:   absolute;
+	bottom:     0;
+	left:       0;
+	width:      100%;
+	border:     none;
+	border-top: 1px solid #cccccc;
+	resize:     none;
+	height:     5em;
+	padding:    5px;
 }

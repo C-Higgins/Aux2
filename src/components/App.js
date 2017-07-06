@@ -27,8 +27,8 @@ class App extends Component {
 			current_track: null,
 			songs:         {},
 		})
-		db.child('/room_users/' + key).set({
-			u1: true,
+		db.child('/room_data/' + key + '/users').set({
+			u1: true
 		})
 		db.child('/users/u1/rooms').set({
 			key: true,
@@ -46,7 +46,7 @@ class App extends Component {
 			return Object.assign({},
 				this.state.rooms[key],
 				this.state.room_data[key],
-				{users: Object.keys(this.state.room_users[key]).length},
+				{users: Object.keys(this.state.room_data[key].users).length || 0},
 				{key: key}
 			)
 		})
