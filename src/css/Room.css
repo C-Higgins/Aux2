@@ -1,44 +1,65 @@
 #room-container {
 	max-width: 1024px;
+	height:    100%;
 	display:   flex;
 	margin:    10px;
 }
 
 #music {
-	width: 100%;
+	width:          100%;
+	height:         100%;
+	display:        flex;
+	flex-direction: column;
 }
 
 #music #now-playing {
-	height:  35%;
-	display: flex;
+	/*height:   35%;*/
+	display:  flex;
+	position: relative;
+	height:   200px;
 }
 
-#music #now-playing img {
-	height:  100%;
-	padding: 0 10px 10px 0;
+#music #now-playing #img-container {
+	max-width:     250px;
+	margin-bottom: 10px;
+}
+
+#img-container img {
+	max-width:  100%;
+	max-height: 100%;
 }
 
 #music #now-playing #right {
-	position: relative;
+	margin-left: 20px;
+	overflow:    hidden;
+	position:    relative;
 }
 
 #music #now-playing #right #music-info {
 	padding-top: 20px;
-	font-size:   1.3em;
+	font-size:   2.5vmin;
+	max-height:  175px;
 }
 
 #music #now-playing #right #controls {
-	bottom:   10px;
-	position: absolute;
+	bottom:     10px;
+	position:   absolute;
+	width:      100%;
+	height:     25px;
+	/*background: white;*/
+	border-top: 1px solid #cccccc;
+	z-index:    1;
+	background: #eeeeee;
 }
 
 #music #queue {
 	background:      white;
 	outline:         1px solid #cccccc;
-	height:          65%;
+	/*height:          60%;*/
 	width:           100%;
 	padding:         10px;
 	border-collapse: collapse;
+	flex:            1 1 250px;
 }
 
 #queueTable {
@@ -66,6 +87,12 @@
 	height:  10px;
 }
 
+#music #upload {
+	/*height:  60px;*/
+	flex:    0 0 60px;
+	outline: 1px solid #cccccc;
+}
+
 #chat {
 	width:       400px;
 	margin-left: 10px;
@@ -84,6 +111,7 @@
 	top:        0;
 	left:       0;
 	padding:    0 10px;
+	width:      100%;
 }
 
 .message {
@@ -98,6 +126,6 @@
 	border:     none;
 	border-top: 1px solid #cccccc;
 	resize:     none;
-	height:     5em;
+	height:     60px;
 	padding:    5px;
 }

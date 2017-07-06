@@ -5,10 +5,12 @@ function RoomPage(props) {
 		<div id="room-container">
 			<div id="music">
 				<div id="now-playing">
-					<img className="pic"
-						 alt="np_album"
-						 src="http://d817ypd61vbww.cloudfront.net/sites/default/files/styles/media_responsive_widest/public/tile/image/AbbeyRoad.jpg"
-					/>
+					<div id="img-container">
+						<img className="pic"
+							 alt="np_album"
+							 src="http://d817ypd61vbww.cloudfront.net/sites/default/files/styles/media_responsive_widest/public/tile/image/AbbeyRoad.jpg"
+						/>
+					</div>
 					<div id="right">
 						<div id="music-info">
 							The Beatles - Lucy in the Sky with Diamonds <br/>
@@ -40,6 +42,9 @@ function RoomPage(props) {
 							</div>
 						</div>
 					</div>
+				</div>
+				<div id="upload">
+					upload
 				</div>
 			</div>
 			<Chat messages={props.messages} sendChat={props.sendChat}/>
