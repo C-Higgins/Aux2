@@ -65,7 +65,6 @@
 	margin:        auto;
 	margin-top:    100px;
 
-	/*color:         #606060;*/
 	background:    white;
 	text-align:    left;
 	border-radius: 2%;
@@ -85,7 +84,7 @@
 	height:              50px;
 	width:               50px;
 
-	outline:             1px solid #cccccc;
+	border:              1px solid #cccccc;
 	color:               #560e0e;
 	background:          #eeeeee;
 	font-size:           50px;
@@ -99,7 +98,7 @@
 }
 
 .checkbox:hover {
-	outline: 1px solid #560e0e;
+	border: 1px solid #560e0e;
 }
 
 .copy-box {

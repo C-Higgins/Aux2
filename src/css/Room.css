@@ -56,8 +56,9 @@
 }
 
 #queue.ReactTable {
-	border: 1px solid #cccccc;
-	font:   .8em 'Noto Sans'
+	border:     1px solid #cccccc;
+	font:       .8em 'Noto Sans';
+	min-height: 0;
 }
 
 .rt-td {
