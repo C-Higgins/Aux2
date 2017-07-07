@@ -1,26 +1,27 @@
 #room-container {
 	max-width: 1024px;
-	height:    100%;
 	display:   flex;
 	margin:    10px;
+	position: absolute;
+	top: 120px;
+	bottom: 0;
 }
 
 #music {
 	width:          100%;
-	height:         100%;
 	display:        flex;
 	flex-direction: column;
 }
 
 #music #now-playing {
-	/*height:   35%;*/
 	display:  flex;
 	position: relative;
 	height:   200px;
 }
 
 #music #now-playing #img-container {
-	max-width:     250px;
+	max-width:     200px;
+	width: 25vmin;
 	margin-bottom: 10px;
 }
 
