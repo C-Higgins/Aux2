@@ -1,13 +1,10 @@
-import React, {Component} from 'react';
-import '../css/App.css';
-import {db} from '../index.js'
-import Lobby from './Lobby.js'
-import Room from './Room.js'
-import {
-	BrowserRouter as Router,
-	Route,
-	Link
-} from 'react-router-dom'
+import React, {Component} from "react"
+import "../css/App.css"
+import {db} from "../index.js"
+import Lobby from "./Lobby.js"
+import Room from "./Room.js"
+import Checkbox from "./Checkbox.js"
+import {BrowserRouter as Router, Link, Route} from "react-router-dom"
 
 class App extends Component {
 
@@ -70,6 +67,18 @@ function Header(props) {
 		<div id="buttons">
 			<div id="create-button" className="lobby-button">---></div>
 			<div id="button2" className="lobby-button">--></div>
+		</div>
+
+		<div className="-modal">
+			<div id="create-room">
+				<label>Name</label><br/>
+				<input type="text" className="copy-box" spellCheck={false}/>
+				<br/><br/>
+				<label>Private?</label><br/>
+				<Checkbox />
+
+				<i className="material-icons submit-btn">play_circle_filled</i>
+			</div>
 		</div>
 	</div>
 }
