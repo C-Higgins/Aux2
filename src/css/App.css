@@ -16,6 +16,8 @@ body {
 	max-width:      1024px;
 	display:        flex;
 	flex-direction: column;
+	height:         100vh;
+	position:       relative;
 }
 
 #header-color {

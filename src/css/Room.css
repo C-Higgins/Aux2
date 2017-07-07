@@ -1,14 +1,16 @@
 #room-container {
 	max-width: 1024px;
+	width:     100%;
 	display:   flex;
-	margin:    10px;
-	position: absolute;
-	top: 120px;
-	bottom: 0;
+	padding:   10px;
+	position:  absolute;
+	top:       120px;
+	bottom:    0;
 }
 
 #music {
 	width:          100%;
+	max-width:      694px;
 	display:        flex;
 	flex-direction: column;
 }
@@ -21,7 +23,7 @@
 
 #music #now-playing #img-container {
 	max-width:     200px;
-	width: 25vmin;
+	width:         26vmin;
 	margin-bottom: 10px;
 }
 
@@ -53,39 +55,13 @@
 	background: #eeeeee;
 }
 
-#music #queue {
-	background:      white;
-	outline:         1px solid #cccccc;
-	/*height:          60%;*/
-	width:           100%;
-	padding:         10px;
-	border-collapse: collapse;
-	flex:            1 1 250px;
+#queue.ReactTable {
+	border: 1px solid #cccccc;
+	font:   .8em 'Noto Sans'
 }
 
-#queueTable {
-	display: table;
-	width:   100%;
-}
-
-#music #queue #queueHeader {
-	display:       table-header-group;
-	width:         100%;
-	border-bottom: 1px solid #cccccc;
-}
-
-#music #queue #queueHeader span, .row span {
-	display: table-cell;
-	padding: 5px;
-}
-
-#queueRows {
-	display: table-row-group;
-}
-
-.row {
-	display: table-row;
-	height:  10px;
+.rt-td {
+	padding: 3px 5px !important;
 }
 
 #music #upload {
@@ -95,7 +71,8 @@
 }
 
 #chat {
-	width:       400px;
+	width:       300px;
+	flex-shrink: 0;
 	margin-left: 10px;
 	padding:     10px;
 	background:  white;
@@ -104,7 +81,7 @@
 }
 
 #chat-messages {
-	font:       13px 'Noto Sans', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, Sans-Serif;
+	font:       .8em 'Noto Sans', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, Sans-Serif;
 	color:      #606060;
 	overflow-y: scroll;
 	position:   absolute;

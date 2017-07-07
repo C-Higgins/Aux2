@@ -1,6 +1,26 @@
-import React from 'react';
-import Chat from './Chat.js'
+import React from "react"
+import Chat from "./Chat.js"
+import ReactTable from "react-table"
+import "react-table/react-table.css"
 function RoomPage(props) {
+	const columns = [{
+		Header:   'Title',
+		accessor: 'title' // String-based value accessors!
+	}, {
+		Header:   'Artist',
+		accessor: 'artist'
+	}, {
+		Header:   'Album',
+		accessor: 'album' // Custom value accessors!
+	}, {
+		Header:    'Time', // Custom header components!
+		accessor:  'time',
+		resizable: false,
+		width:     80,
+	}]
+
+
+
 	return (
 		<div id="room-container">
 			<div id="music">
@@ -13,36 +33,22 @@ function RoomPage(props) {
 					</div>
 					<div id="right">
 						<div id="music-info">
-							The Beatles - Lucy in the Sky with Diamonds <br/>
-							<small>Sgt. Pepper's Lonely Hearts Club Band, 1967</small>
+							Lucy in the Sky with Diamonds <br/>
+							<small>The Beatles <br/> Sgt. Pepper's Lonely Hearts Club Band, 1967</small>
 						</div>
 						<div id="controls">
 							controls
 						</div>
 					</div>
 				</div>
-				<div id="queue">
-					<div id="queueTable">
-						<div id="queueHeader">
-							<span className="player">Title</span>
-							<span className="rating">Artist</span>
-							<span className="time">Album</span>
-							<span className="mode">Time</span>
-						</div>
-						<div id="queueRows">
-							<div className="row">
-								<span>row1</span>
-								<span>row1</span>
-								<span>row1</span>
-							</div>
-							<div className="row">
-								<span>row2</span>
-								<span>row2</span>
-								<span>row2</span>
-							</div>
-						</div>
-					</div>
-				</div>
+				<ReactTable
+					id="queue"
+					className="-striped"
+					data={[]}
+					columns={columns}
+					resizable={true}
+					showPaginationBottom={false}
+				/>
 				<div id="upload">
 					upload
 				</div>
