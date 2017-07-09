@@ -2,7 +2,7 @@ import React, {Component} from "react"
 import "../css/App.css"
 import {db} from "../index.js"
 import Lobby from "./Lobby.js"
-import Room from "./Room.js"
+import Room from "./RoomHandler.js"
 import Modal from "./Modal.js"
 import {BrowserRouter as Router, Link, Route} from "react-router-dom"
 

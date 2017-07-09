@@ -1,9 +1,9 @@
-import React, {Component} from 'react';
-import '../css/Room.css';
-import ErrorPage from './ErrorPage.js'
-import RoomPage from './RoomPage.js'
-import firebase from 'firebase'
-import Spinner from 'react-spinkit'
+import React, {Component} from "react"
+import "../css/Room.css"
+import ErrorPage from "./ErrorPage.js"
+import RoomPage from "./RoomPage.js"
+import firebase from "firebase"
+import Spinner from "react-spinkit"
 class Room extends Component {
 
 
@@ -15,7 +15,7 @@ class Room extends Component {
 		this.state = {
 			loading:  true,
 			loaded:   0,
-			messages: []
+			messages: [],
 		}
 		this.sendChat = this.sendChat.bind(this)
 	}

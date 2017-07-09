@@ -2,6 +2,7 @@ import React from "react"
 import Chat from "./Chat.js"
 import ReactTable from "react-table"
 import "react-table/react-table.css"
+
 function RoomPage(props) {
 	const columns = [{
 		Header:   'Title',
@@ -23,6 +24,7 @@ function RoomPage(props) {
 
 	return (
 		<div id="room-container">
+			{/*Player here*/}
 			<div id="music">
 				<div id="now-playing">
 					<div id="img-container">
