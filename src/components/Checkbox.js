@@ -5,23 +5,16 @@ class Checkbox extends Component {
 		this.state = {
 			checked: false
 		}
-
-		this.toggle = this.toggle.bind(this)
 	}
 
 
-	toggle() {
-		this.setState(ps => ({
-				checked: !ps.checked
-			}
-		))
-	}
+
 
 	render() {
 		return (
 			<div className="checkbox"
-				 onClick={this.toggle}>
-				{this.state.checked && '✓'}
+				 onClick={() => this.props.toggle()}>
+				{this.props.checked && '✓'}
 			</div>
 		)
 	}

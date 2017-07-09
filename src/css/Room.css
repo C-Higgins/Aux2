@@ -55,10 +55,12 @@
 	background: #eeeeee;
 }
 
-#queue.ReactTable {
+.queue.ReactTable {
 	border:     1px solid #cccccc;
 	font:       .8em 'Noto Sans';
 	min-height: 0;
+	flex:       1 1 auto;
+	margin:     10px 0;
 }
 
 .rt-td {

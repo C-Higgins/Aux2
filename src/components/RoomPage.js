@@ -42,8 +42,7 @@ function RoomPage(props) {
 					</div>
 				</div>
 				<ReactTable
-					id="queue"
-					className="-striped"
+					className="-striped queue"
 					data={[]}
 					columns={columns}
 					resizable={true}

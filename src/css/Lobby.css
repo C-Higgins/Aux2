@@ -1,6 +1,7 @@
 #rooms-container {
 	/*border: 1px solid white;*/
 	margin:          auto;
+	margin-top:      120px;
 	max-width:       1024px;
 	position:        relative;
 	display:         flex;
@@ -57,21 +58,6 @@
 	font-size:  14px;
 }
 
-.-modal {
-	width:         90%;
-	max-width:     500px;
-	height:        250px;
-	position:      static;
-	margin:        auto;
-	margin-top:    100px;
-
-	background:    white;
-	text-align:    left;
-	border-radius: 2%;
-	box-shadow:    #606060 0px 0px 80px 15px;
-	padding:       20px 10px;
-}
-
 #create-room {
 	width:       400px;
 	margin:      auto;
@@ -107,9 +93,67 @@
 	padding:     10px;
 	outline:     1px dashed #cccccc;
 	border:      none;
+	background:  #eeeeee;
 	font-family: inherit;
 }
 
 .copy-box:focus, .copy-box:hover {
 	outline: 1px solid #560e0e;
+}
+
+.submit-btn {
+	/*float:     right;*/
+	font-size: 60px;
+}
+
+.modal {
+	width:         90%;
+	max-width:     500px;
+	height:        250px;
+	position:      fixed;
+	margin:        auto;
+	margin-top:    100px;
+
+	top:           100px;
+	left:          0;
+	right:         0;
+	z-index:       999;
+
+	background:    white;
+	text-align:    left;
+	border-radius: 2%;
+	box-shadow:    #606060 0px 0px 80px 15px;
+	padding:       20px 10px;
+}
+
+.modal .close {
+	position:  absolute;
+	top:       10px;
+	right:     10px;
+	color:     #cccccc;
+	cursor:    pointer;
+	font-size: 24px;
+}
+
+.modal .close:hover {
+	color: #560e0e;
+}
+
+#modal-buttons {
+	margin-top: 30px;
+}
+
+#modal-buttons i {
+	align-self: flex-end;
+	color:      #cccccc;
+	cursor:     pointer;
+}
+
+#modal-buttons i:hover {
+	color: #560e0e;
+}
+
+.col-2 {
+	display:         flex;
+	justify-content: space-around;
 }

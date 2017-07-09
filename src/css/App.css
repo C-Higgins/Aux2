@@ -14,10 +14,6 @@ body {
 #wrapper {
 	margin:         auto;
 	max-width:      1024px;
-	display:        flex;
-	flex-direction: column;
-	height:         100vh;
-	position:       relative;
 }
 
 #header-color {
@@ -30,12 +26,13 @@ body {
 }
 
 #header {
-	height:   120px;
-	width:    100%;
-	position: sticky;
-	top:      0;
-	z-index:  2;
-	color:    #eeeeee;
+	height:    120px;
+	width:     100%;
+	max-width: 1024px;
+	position:  fixed;
+	top:       0;
+	z-index:   2;
+	color:     #eeeeee;
 }
 
 #aux {
