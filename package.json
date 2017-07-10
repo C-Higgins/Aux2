@@ -7,7 +7,7 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-router-dom": "^4.1.1",
-	"react-sound": "github:C-Higgins/react-sound",
+    "react-sound": "github:C-Higgins/react-sound",
     "react-spinkit": "^3.0.0",
     "react-table": "^6.5.1"
   },
