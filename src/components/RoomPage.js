@@ -1,6 +1,7 @@
 import React from "react"
 import Chat from "./Chat.js"
 import ReactTable from "react-table"
+import Player from "react-sound"
 import "react-table/react-table.css"
 
 function RoomPage(props) {
@@ -21,10 +22,13 @@ function RoomPage(props) {
 	}]
 
 
-
 	return (
 		<div id="room-container">
-			{/*Player here*/}
+			<Player
+				url="https://firebasestorage.googleapis.com/v0/b/aux-io.appspot.com/o/02%20She%20Was%20Too%20Good%20To%20Me.mp3?alt=media&token=725d8d47-347e-433c-b81d-049a79511379"
+				playFromPosition={100000}
+				playStatus="PLAYING"
+			/>
 			<div id="music">
 				<div id="now-playing">
 					<div id="img-container">
