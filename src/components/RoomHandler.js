@@ -26,16 +26,21 @@ class Room extends Component {
 				this.setState({nullPage: true})
 			}
 			this.setState(ps => {
-				return {...data.val(), loaded: ps.loaded+1}
+				return {...data.val(), loaded: ps.loaded + 1}
 			})
 			this.checkDoneLoading()
 		})
 
-		this.fb.child('room_data/' + this.roomID).on('value', data => {
-			this.setState(ps => {
-				return {...data.val(), loaded: ps.loaded+1}
+		this.fb.child('room_data/' + this.roomID).on('value', ss => {
+			let data = ss.val()
+			let sid = data.current_track.id
+			this.fb.child('song_urls/' + sid).on('value', url => {
+				data.current_track.url = url.val()
+				this.setState(ps => {
+					return {...data, loaded: ps.loaded + 1}
+				})
 			})
-            this.checkDoneLoading()
+			this.checkDoneLoading()
 		})
 
 		this.fb.child('messages/' + this.roomID).on('child_added', data => {
@@ -83,7 +88,10 @@ class Room extends Component {
 		} else if (this.state.nullPage) {
 			return <ErrorPage e={404}/> //not the r-router way...
 		} else {
-			return <RoomPage messages={this.state.messages} sendChat={this.sendChat}/>
+			return <RoomPage {...this.state.current_track}
+							 messages={this.state.messages}
+							 sendChat={this.sendChat}
+			/>
 		}
 	}
 }
