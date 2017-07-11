@@ -68,7 +68,7 @@
 	padding: 3px 5px !important;
 }
 
-#music #upload {
+#upload {
 	/*height:  60px;*/
 	flex:    0 0 60px;
 	outline: 1px solid #cccccc;
