@@ -24,7 +24,7 @@ class Room extends Component {
 			messages:      [],
 			current_track: {},
 		}
-		this.roomID = props.match.params.roomID
+		this.roomId = props.match.params.roomId
 		this.fb = firebase.database().ref();
 		this.storage = firebase.storage().ref()
 		this.handleUploads = this.handleUploads.bind(this)
@@ -64,7 +64,7 @@ class Room extends Component {
 
 	componentDidMount() {
 		// Initial public room info
-		this.fb.child('rooms/' + this.roomID).once('value', data => {
+		this.fb.child('rooms/' + this.roomId).once('value', data => {
 			if (data.val() === null) {
 				this.setState({nullPage: true})
 			}
@@ -75,9 +75,9 @@ class Room extends Component {
 		})
 
 		// Track queue changes
-		this.fb.child('room_data/' + this.roomID + '/songs').on('child_added', ss => {
+		this.fb.child('room_data/' + this.roomId + '/songs').on('child_added', ss => {
 			let sId = ss.getKey()
-			this.fb.child('song_data/' + sId).once('value', songD => {
+			this.fb.child('song_data/' + this.roomId + '/' + sId).once('value', songD => {
 				this.setState(ps => {
 					return {songs: Object.assign({}, ps.songs, {[sId]: songD.val()}), loaded: ps.loaded + 1}
 				})
@@ -85,7 +85,7 @@ class Room extends Component {
 		})
 
 		// Track current track changes
-		this.fb.child('room_data/' + this.roomID + '/current_track').on('value', ss => {
+		this.fb.child('room_data/' + this.roomId + '/current_track').on('value', ss => {
 			this.setState(ps => {
 				return {current_track: {...ss.val()}, loaded: ps.loaded + 1}
 			})
@@ -93,29 +93,14 @@ class Room extends Component {
 			this.checkDoneLoading()
 		})
 
-		// Listen for messages
-		//this.fb.child('messages/' + this.roomID).on('child_added', data => {
-		//	this.setState(ps => {
-		//		return {messages: ps.messages.concat(data.val())}
-		//	})
-		//})
-
-		this.fb.child('messages/' + this.roomID).limitToLast(100).on('value', data => {
+		// Listen for new messages
+		this.fb.child('messages/' + this.roomId).limitToLast(100).on('value', data => {
 			const messages = Object.keys(data.val()).map(key => {
 				return data.val()[key]
 			})
 			this.setState({messages: messages})
 			this.checkDoneLoading()
 		})
-		//
-		//// Track users joining
-		//this.fb.child('room_data/' + this.roomID + '/users').on('child_added', user => {
-		//	this.fb.child('users/' + user.getKey()).once('value', userD => {
-		//		this.setState(ps => {
-		//			return {userdata: Object.assign({}, ps.userdata, {[userD.getKey()]: userD.val()})}
-		//		})
-		//	})
-		//})
 	}
 
 	checkDoneLoading() {
@@ -125,15 +110,16 @@ class Room extends Component {
 	}
 
 	componentWillUnmount() {
-		this.fb.child('rooms/' + this.roomID).off()
-		this.fb.child('room_data/' + this.roomID).off()
-		this.fb.child('room_users/' + this.roomID).off()
-		this.fb.child('messages/' + this.roomID).off()
+		this.fb.child('rooms/' + this.roomId).off()
+		this.fb.child('room_data/' + this.roomId).off()
+		this.fb.child('song_data/' + this.roomId).off()
+		this.fb.child('room_users/' + this.roomId).off()
+		this.fb.child('messages/' + this.roomId).off()
 		this.fb.off()
 	}
 
 	sendChat(message) {
-		let newMsgRef = firebase.database().ref('messages/' + this.roomID).push()
+		let newMsgRef = firebase.database().ref('messages/' + this.roomId).push()
 		newMsgRef.set({
 			author:  'sendchattest',
 			message: message,
@@ -144,9 +130,12 @@ class Room extends Component {
 
 	render() {
 
-		let uploadMessage = this.state.uploading ? `Uploading ${this.state.uploading} - ${this.state.progress}%` : 'Upload'
-
 		if (!this.state.loading) {
+			let uploadMessage = this.state.uploading ? `Uploading ${this.state.uploading} - ${this.state.progress}%` : 'Upload'
+			let queueData = Object.keys(this.state.songs).map(k => {
+					return this.state.songs[k]
+				}) || []
+
 			return (
 				<div id="room-container">
 					{/*"https://firebasestorage.googleapis.com/v0/b/aux-io.appspot.com/o/02%20She%20Was%20Too%20Good%20To%20Me.mp3?alt=media&token=725d8d47-347e-433c-b81d-049a79511379"
@@ -178,7 +167,7 @@ class Room extends Component {
 						</div>
 						<ReactTable
 							className="-striped queue"
-							data={[]}
+							data={queueData}
 							columns={Room.queueColumns}
 							resizable={true}
 							showPaginationBottom={false}
@@ -199,7 +188,7 @@ class Room extends Component {
 			)
 		} else {
 			return <div id="room-container">
-				<Spinner name="wave" color="#560e0e" fadeIn="none"/>
+				<Spinner name="wave" color="#560e0e" fadeIn="half"/>
 			</div>
 		}
 	}

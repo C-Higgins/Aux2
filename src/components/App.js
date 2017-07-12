@@ -57,11 +57,17 @@ class App extends Component {
 			this.setState(ps => ({loaded: ps.loaded + 1}))
 			this.checkDoneLoading()
 		})
-		let a = this.fb.child('room_data').on('value', data => {
+		this.fb.child('room_data').on('value', data => {
 			this.setState({room_data: {...data.val()}})
 			this.setState(ps => ({loaded: ps.loaded + 1}))
 			this.checkDoneLoading()
 		})
+	}
+
+	componentWillUnmount() {
+		this.fb.child('rooms').off()
+		this.fb.child('room_data').off()
+		this.fb.off()
 	}
 
 	checkDoneLoading() {
@@ -88,7 +94,7 @@ class App extends Component {
 						<Modal submit={this.createRoom} open={this.state.modalOpen}
 							   close={() => this.setState({modalOpen: false})}/>
 						<Route exact path="/" render={() => <Lobby rooms={mergedLobbyData}/>}/>
-						<Route path="/:roomID" component={Room}/>
+						<Route path="/:roomId" component={Room}/>
 					</div>
 				</Router>
 			)
