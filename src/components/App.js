@@ -33,7 +33,7 @@ class App extends Component {
 		}
 		let newRoomData = {
 			track_playing: false,
-			current_track: null,
+			current_track: {},
 			songs:         {},
 			users:         {
 				u1: true,

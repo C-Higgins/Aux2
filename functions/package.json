@@ -2,8 +2,14 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "dependencies": {
-	"firebase-admin": "~4.2.1",
-	"firebase-functions": "^0.5.7"
+    "@google-cloud/storage": "^1.2.0",
+    "firebase-admin": "~4.2.1",
+    "firebase-functions": "^0.5.7",
+    "fs": "0.0.1-security",
+    "music-metadata": "^0.7.5",
+    "musicmetadata": "^2.0.5",
+    "os": "^0.1.1",
+    "path": "^0.12.7"
   },
   "private": true
 }
