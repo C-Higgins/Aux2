@@ -21,6 +21,9 @@ before_script:
 
 script:
   - npm run build
+  - cd functions
+  - npm install
+  - cd ..
 
 after_success:
   - firebase deploy --non-interactive --token=${FIREBASE_TOKEN}

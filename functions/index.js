@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const gcs = require('@google-cloud/storage')(process.env.SERVICE_ACCOUNT_CRED);
+const gcs = require('@google-cloud/storage')//(SAC go here);
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
