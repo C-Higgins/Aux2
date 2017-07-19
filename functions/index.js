@@ -19,11 +19,13 @@ exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent 
 	 song is playing and user uploads song
 	 wait for timer to end and then choose the next song
 	 */
+	console.log('room creation spotted at', roomEvent.params.rId)
 	const currentTrackRef = admin.database().ref('room_data/' + roomEvent.params.rId + '/current_track')
 	const roomId = roomEvent.params.rId
 
 	//wait for song upload
 	functions.database.ref('/room_data/' + roomId + '/songs/{sId}').onCreate(trackEvent => {
+		console.log('song created:', trackEvent.params.sId)
 		const songId = trackEvent.params.sId
 
 		//check if song is currently playing
@@ -32,10 +34,12 @@ exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent 
 			if (!ct.exists()) {
 				return false;
 			}
+			console.log('no current track')
 			//otherwise make it play
 			admin.database().ref('song_urls/' + songId).once('value').then(track => {
 				const trackUrl = track.val()
 				const trackObject = Object.assign({}, trackEvent.data.val(), {url: trackUrl})
+				console.log('setting track')
 				currentTrackRef.set(trackObject)
 			})
 
@@ -48,6 +52,7 @@ exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent 
 
 	// after track ends, start the next one
 	function afterSongEnds(roomId) {
+		console.log('song ended')
 		//TODO: delete previous track in here
 		getNextTrack(roomId).then(nextTrack => {
 			setCurrentTrack(nextTrack)
@@ -56,6 +61,7 @@ exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent 
 	}
 
 	function getNextTrack(roomKey) {
+		console.log('getting next track')
 		admin.database().ref('song_data/' + roomKey).once('value').then(ss => {
 			const keys = Object.keys(ss.val())
 			const numberOfSongs = keys.length
@@ -67,10 +73,12 @@ exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent 
 	}
 
 	function setCurrentTrack(roomKey, trackObject) {
+		console.log('setting next track')
 		currentTrackRef.set(trackObject)
 	}
 
 	function mergeTrackWithUrl(trackObject, trackId) {
+		console.log('merging track')
 		admin.database().ref('song_urls/' + trackId).once('value').then(track => {
 			const trackUrl = track.val()
 			const mergedTrackObject = Object.assign({}, trackObject, {url: trackUrl})
