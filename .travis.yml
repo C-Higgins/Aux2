@@ -23,6 +23,7 @@ script:
   - npm run build
   - cd functions
   - npm install
+  - npm update
   - cd ..
 
 after_success:

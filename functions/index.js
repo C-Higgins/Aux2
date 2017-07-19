@@ -67,7 +67,7 @@ exports.trackEnded = functions.https.onRequest((req, res) => {
 				return setCurrentTrack(nextTrack)
 			}).then(() => {
 				console.log('all done')
-				return res.status(200)
+				return res.status(200).send()
 			})
 
 			function getNextTrack(roomKey) {
