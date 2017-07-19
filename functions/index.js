@@ -8,17 +8,76 @@ const mm = require('musicmetadata');
 admin.initializeApp(functions.config().firebase);
 
 
-//exports.makeUppercase = functions.database.ref('/messages/{roomId}/{mId}')
-//.onCreate(event => {
-//	// Grab the current value of what was written to the Realtime Database.
-//	let message = event.data.val();
-//	message.message = message.message.toUpperCase();
-//	// You must return a Promise when performing asynchronous tasks inside a Functions such as
-//	// writing to the Firebase Realtime Database.
-//	// Setting an "uppercase" sibling in the Realtime Database returns a Promise.
-//	let key = admin.database().ref('messages/' + event.params.roomId).push()
-//	//woops I had an infloop
-//});
+exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent => {
+	/*
+	 two scenarios
+	 1:
+	 user uploads first song
+	 start it immediately by setting current song to that
+	 set timer for song duration
+	 2:
+	 song is playing and user uploads song
+	 wait for timer to end and then choose the next song
+	 */
+	const currentTrackRef = admin.database().ref('room_data/' + roomEvent.params.rId + '/current_track')
+	const roomId = event.params.rId
+
+	//wait for song upload
+	functions.database.ref('/room_data/' + roomId + '/songs/{sId}').onCreate(trackEvent => {
+		const songId = trackEvent.params.sId
+
+		//check if song is currently playing
+		currentTrackRef.once('value', ct => {
+			//do nothing if it is
+			if (!ct.exists()) {
+				return false;
+			}
+			//otherwise make it play
+			admin.database().ref('song_urls/' + songId).once('value').then(track => {
+				const trackUrl = track.val()
+				const trackObject = Object.assign({}, trackEvent.data.val(), {url: trackUrl})
+				currentTrackRef.set(trackObject)
+			})
+
+			//and set the timer for its duration
+			admin.database().ref(`song_data/${roomId}/${songId}`).once('value').then(track => {
+				setTimer(afterSongEnds(roomId), track.val().duration * 1000)
+			})
+		})
+	})
+
+	// after track ends, start the next one
+	function afterSongEnds(roomId) {
+		getNextTrack(roomId).then(nextTrack => {
+			setCurrentTrack(nextTrack)
+			setTimer(afterSongEnds(), nextTrack.duration * 1000)
+		})
+	}
+
+	function getNextTrack(roomKey) {
+		admin.database().ref('song_data/' + roomKey).once('value').then(ss => {
+			const keys = Object.keys(ss.val())
+			const numberOfSongs = keys.length
+			const rand = Math.floor(Math.random() * numberOfSongs)
+			mergeTrackWithUrl(ss.val()[keys[rand]], keys[rand]).then(trackObject => {
+				return trackObject
+			})
+		})
+	}
+
+	function setCurrentTrack(roomKey, trackObject) {
+		admin.database().ref('room_data/' + roomKey + '/current_track').set(trackObject)
+	}
+
+	function mergeTrackWithUrl(trackObject, trackId) {
+		admin.database().ref('song_urls/' + trackId).once('value').then(track => {
+			const trackUrl = track.val()
+			const mergedTrackObject = Object.assign({}, trackObject, {url: trackUrl})
+			return mergedTrackObject
+		})
+	}
+
+});
 //
 //exports.afterUpload = functions.storage.object().onChange(event => {
 //	if (event.data.resourceState === 'not_exists') {
