@@ -31,6 +31,7 @@ class Room extends Component {
 		this.storage = firebase.storage().ref()
 		this.handleUploads = this.handleUploads.bind(this)
 		this.sendChat = this.sendChat.bind(this)
+		this.trackEnded = this.trackEnded.bind(this)
 	}
 
 	static queueColumns = [{
@@ -145,13 +146,21 @@ class Room extends Component {
 		this.fb.off()
 	}
 
+	trackEnded() {
+		//call the firebase http function here
+		let oReq = new XMLHttpRequest();
+		let url = "https://us-central1-aux-io.cloudfunctions.net/trackEnded"
+		url += `?roomId=${this.roomId}`
+		oReq.open("GET", url);
+		oReq.send();
+	}
+
 	sendChat(message) {
 		let newMsgRef = firebase.database().ref('messages/' + this.roomId).push()
 		newMsgRef.set({
 			author:  'sendchattest',
 			message: message,
 		})
-
 	}
 
 
@@ -176,6 +185,7 @@ class Room extends Component {
 						//playFromPosition={Date.now() - this.props.startedAt}
 						playFromPosition={0}
 						playStatus="PLAYING"
+						onFinishedPlaying={this.trackEnded}
 					/>
 					<div id="music">
 						<div id="now-playing">
