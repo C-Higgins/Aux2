@@ -8,89 +8,75 @@ const mm = require('musicmetadata');
 admin.initializeApp(functions.config().firebase);
 
 
-exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent => {
-	/*
-	 two scenarios
-	 1:
-	 user uploads first song
-	 start it immediately by setting current song to that
-	 set timer for song duration
-	 2:
-	 song is playing and user uploads song
-	 wait for timer to end and then choose the next song
-	 */
-	console.log('room creation spotted at', roomEvent.params.rId)
-	const currentTrackRef = admin.database().ref('room_data/' + roomEvent.params.rId + '/current_track')
-	const roomId = roomEvent.params.rId
+exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/{sId}').onCreate(event => {
+	const roomId = event.params.rId
+	const songId = event.params.sId
+	console.log('song created:', songId)
+	const currentTrackRef = admin.database().ref('room_data/' + roomId + '/current_track')
+	//check if song is currently playing
+	return currentTrackRef.once('value').then(ct => {
+		//do nothing if it is
+		if (ct.exists()) {
+			return;
+		}
+		console.log('no current track')
+		const songUrl_pr = admin.database().ref('song_urls/' + songId).once('value')
+		const songData_pr = admin.database().ref(`song_data/${roomId}/${songId}`).once('value')
 
-	//wait for song upload
-	return functions.database.ref('/room_data/' + roomId + '/songs/{sId}').onCreate(trackEvent => {
-		console.log('song created:', trackEvent.params.sId)
-		const songId = trackEvent.params.sId
 
-		//check if song is currently playing
-		return currentTrackRef.once('value', ct => {
-			//do nothing if it is
-			if (!ct.exists()) {
-				return;
-			}
-			console.log('no current track')
+		return Promise.all([songUrl_pr, songData_pr]).then(results => {
+			const trackUrl = results[0].val()
+			const trackObject = results[1].val()
+
+			const newTrackObject = Object.assign({}, trackObject, {url: trackUrl})
+			console.log('setting track')
 			//otherwise make it play
-			const playTrack_pr = admin.database().ref('song_urls/' + songId).once('value')
-			playTrack_pr.then(track => {
-				const trackUrl = track.val()
-				const trackObject = Object.assign({}, trackEvent.data.val(), {url: trackUrl})
-				console.log('setting track')
-				return currentTrackRef.set(trackObject)
-			})
-
-			//and set the timer for its duration
-			const setTimer_pr = admin.database().ref(`song_data/${roomId}/${songId}`).once('value')
-			setTimer_pr.then(track => {
+			return currentTrackRef.set(newTrackObject).then(() => {
+				console.log('setting timer')
+				//and set the timer for its duration
 				return setTimer(afterSongEnds(roomId), track.val().duration * 1000)
 			})
 
-			return Promise.all([playTrack_pr, setTimer_pr])
 		})
 	})
+})
 
-	// after track ends, start the next one
-	function afterSongEnds(roomId) {
-		console.log('song ended')
-		//TODO: delete previous track in here
-		return getNextTrack(roomId).then(nextTrack => {
-			setCurrentTrack(nextTrack)
-			return setTimer(afterSongEnds(), nextTrack.duration * 1000)
-		})
-	}
+// after track ends, start the next one
+function afterSongEnds(roomId) {
+	console.log('song ended')
+	//TODO: delete previous track in here
+	return getNextTrack(roomId).then(nextTrack => {
+		setCurrentTrack(nextTrack)
+		return setTimer(afterSongEnds(), nextTrack.duration * 1000)
+	})
+}
 
-	function getNextTrack(roomKey) {
-		console.log('getting next track')
-		return admin.database().ref('song_data/' + roomKey).once('value').then(ss => {
-			const keys = Object.keys(ss.val())
-			const numberOfSongs = keys.length
-			const rand = Math.floor(Math.random() * numberOfSongs)
-			return mergeTrackWithUrl(ss.val()[keys[rand]], keys[rand])
-		}).then(trackObject => {
-			return trackObject
-		})
-	}
+function getNextTrack(roomKey) {
+	console.log('getting next track')
+	return admin.database().ref('song_data/' + roomKey).once('value').then(ss => {
+		const keys = Object.keys(ss.val())
+		const numberOfSongs = keys.length
+		const rand = Math.floor(Math.random() * numberOfSongs)
+		return mergeTrackWithUrl(ss.val()[keys[rand]], keys[rand])
+	}).then(trackObject => {
+		return trackObject
+	})
+}
 
-	function setCurrentTrack(roomKey, trackObject) {
-		console.log('setting next track')
-		return currentTrackRef.set(trackObject)
-	}
+function setCurrentTrack(roomKey, trackObject) {
+	console.log('setting next track')
+	return currentTrackRef.set(trackObject)
+}
 
-	function mergeTrackWithUrl(trackObject, trackId) {
-		console.log('merging track')
-		return admin.database().ref('song_urls/' + trackId).once('value').then(track => {
-			const trackUrl = track.val()
-			const mergedTrackObject = Object.assign({}, trackObject, {url: trackUrl})
-			return mergedTrackObject
-		})
-	}
+function mergeTrackWithUrl(trackObject, trackId) {
+	console.log('merging track')
+	return admin.database().ref('song_urls/' + trackId).once('value').then(track => {
+		const trackUrl = track.val()
+		const mergedTrackObject = Object.assign({}, trackObject, {url: trackUrl})
+		return mergedTrackObject
+	})
+}
 
-});
 //
 //exports.afterUpload = functions.storage.object().onChange(event => {
 //	if (event.data.resourceState === 'not_exists') {
