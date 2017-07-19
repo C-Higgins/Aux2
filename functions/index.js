@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const cors = require('cors')({origin: true});
 const gcs = require('@google-cloud/storage')//(SAC go here);
 const path = require('path');
 const os = require('os');
@@ -65,7 +66,8 @@ exports.trackEnded = functions.https.onRequest((req, res) => {
 			return getNextTrack(roomId).then(nextTrack => {
 				return setCurrentTrack(nextTrack)
 			}).then(() => {
-				return console.log('all done')
+				console.log('all done')
+				return res.status(200)
 			})
 
 			function getNextTrack(roomKey) {
