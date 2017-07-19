@@ -20,7 +20,7 @@ exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent 
 	 wait for timer to end and then choose the next song
 	 */
 	const currentTrackRef = admin.database().ref('room_data/' + roomEvent.params.rId + '/current_track')
-	const roomId = event.params.rId
+	const roomId = roomEvent.params.rId
 
 	//wait for song upload
 	functions.database.ref('/room_data/' + roomId + '/songs/{sId}').onCreate(trackEvent => {
@@ -48,6 +48,7 @@ exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent 
 
 	// after track ends, start the next one
 	function afterSongEnds(roomId) {
+		//TODO: delete previous track in here
 		getNextTrack(roomId).then(nextTrack => {
 			setCurrentTrack(nextTrack)
 			setTimer(afterSongEnds(), nextTrack.duration * 1000)
@@ -66,7 +67,7 @@ exports.roomHandler = functions.database.ref('/rooms/{rId}').onCreate(roomEvent 
 	}
 
 	function setCurrentTrack(roomKey, trackObject) {
-		admin.database().ref('room_data/' + roomKey + '/current_track').set(trackObject)
+		currentTrackRef.set(trackObject)
 	}
 
 	function mergeTrackWithUrl(trackObject, trackId) {

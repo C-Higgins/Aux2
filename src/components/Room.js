@@ -65,7 +65,7 @@ class Room extends Component {
 					this.setState({uploading: file.name})
 					let uploadSongTask = this.storage.child('songs/' + file.name).put(file)
 
-					if (metadata.picture) {
+					if (metadata.picture && metadata.picture[0]) {
 						var uploadAlbumTask = this.storage.child('art/' + file.name + '.' + metadata.picture[0].format).put(metadata.picture[0].data)
 					}
 					uploadSongTask.on('state_changed', ss => {
