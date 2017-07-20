@@ -40,15 +40,14 @@ class App extends Component {
 			}
 		}
 
-		this.fb.child('/rooms/' + key).set(newRoom)
-		this.fb.child('/room_data/' + key).set(newRoomData)
-
-		this.fb.child('/users/u1/rooms').update({
+		const p1 = this.fb.child('/rooms/' + key).set(newRoom)
+		const p2 = this.fb.child('/room_data/' + key).set(newRoomData)
+		const p3 = this.fb.child('/users/u1/rooms').update({
 			[key]: true,
 		})
-
-		this.setState({modalOpen: false})
-		window.location = '/' + key;
+		Promise.all([p1, p2, p3]).then(() => {
+			window.location = '/' + key;
+		})
 	}
 
 	componentWillMount() {
@@ -78,14 +77,19 @@ class App extends Component {
 
 	render() {
 		if (!this.state.loading) {
-			const mergedLobbyData = Object.keys(this.state.rooms).map(key => {
-				return Object.assign({},
-					this.state.rooms[key],
-					this.state.room_data[key],
-					{users: Object.keys(this.state.room_data[key].users).length || 0},
-					{key: key}
-				)
-			})
+			if (this.state.rooms && this.state.room_data) {
+				var mergedLobbyData = Object.keys(this.state.rooms).map(key => {
+					return Object.assign({},
+						this.state.rooms[key],
+						this.state.room_data[key],
+						{users: Object.keys(this.state.room_data[key].users).length || 0},
+						{key: key}
+					)
+				})
+			} else {
+				mergedLobbyData = []
+			}
+
 
 			return (
 				<Router>

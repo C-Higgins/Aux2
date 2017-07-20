@@ -8,7 +8,6 @@ import Player from "react-sound"
 import Upload from "react-dropzone"
 import Spinner from "react-spinkit"
 import firebase from "firebase"
-//import mm from "music-metadata"
 import mm from "musicmetadata"
 import "react-table/react-table.css"
 import "../css/Room.css"
@@ -19,12 +18,11 @@ class Room extends Component {
 		super(props)
 
 		this.state = {
-			uploading:     null,
-			progress:      0,
-			loading:       true,
-			loaded:        0,
-			messages:      [],
-			current_track: {},
+			uploading: null,
+			progress:  0,
+			loading:   true,
+			loaded:    0,
+			messages:  [],
 		}
 		this.roomId = props.match.params.roomId
 		this.fb = firebase.database().ref();
@@ -36,20 +34,21 @@ class Room extends Component {
 
 	static queueColumns = [{
 		Header:   'Title',
-		accessor: 'title' // String-based value accessors!
+		accessor: 'title'
 	}, {
 		Header:   'Artist',
 		accessor: 'artist'
 	}, {
 		Header:   'Album',
-		accessor: 'album' // Custom value accessors!
+		accessor: 'album'
 	}, {
-		Header:    'Time', // Custom header components!
+		Header:    'Time',
 		accessor:  'duration',
 		resizable: false,
-		width:     80,
+		width:     60,
 	}]
 
+	//TODO: When uploading multiple files it visually fucks up
 	handleUploads(accepted, rejected) {
 		if (accepted.length) {
 			accepted.forEach(file => {
@@ -94,7 +93,7 @@ class Room extends Component {
 
 	componentDidMount() {
 		// Initial public room info
-		this.fb.child('rooms/' + this.roomId).once('value', data => {
+		this.fb.child('rooms/' + this.roomId).once('value').then(data => {
 			if (data.val() === null) {
 				this.setState({nullPage: true})
 			}
@@ -103,19 +102,31 @@ class Room extends Component {
 		})
 
 		// Track queue changes
-		this.fb.child('room_data/' + this.roomId + '/songs').on('child_added', ss => {
-			let sId = ss.getKey()
-			this.fb.child('song_data/' + this.roomId + '/' + sId).once('value', songD => {
-				this.setState(ps => {
-					return {songs: Object.assign({}, ps.songs, {[sId]: songD.val()})}
+		this.fb.child('room_data/' + this.roomId + '/songs').on('value', data => {
+			if (data.val()) {
+				let songsVar = {}
+				Object.keys(data.val()).forEach(sId => {
+					this.fb.child('song_data/' + this.roomId + '/' + sId).once('value', songD => {
+						this.setState(ps => {
+							return {songs: Object.assign(songsVar, {[sId]: songD.val()})}
+						})
+						this.checkDoneLoading()
+					})
 				})
-			})
+
+			} else {
+				this.setState({songs: {}})
+				this.checkDoneLoading()
+			}
+
 		})
 
 		// Track current track changes
 		this.fb.child('room_data/' + this.roomId + '/current_track').on('value', ss => {
+			if (ss.exists()) {
+				this.setState({playFrom: Math.max(Date.now() - ss.val().startedAt, 0)})
+			}
 			this.setState({current_track: {...ss.val()}})
-
 			this.checkDoneLoading()
 		})
 
@@ -127,13 +138,14 @@ class Room extends Component {
 				})
 				this.setState({messages: messages})
 			}
-			this.checkDoneLoading()
 		})
 	}
 
 	checkDoneLoading() {
-		this.setState(ps => {
-			return {loading: this.state.messages === {}}
+		this.setState({
+			loading: this.state.current_track === undefined ||
+					 this.state.songs === undefined ||
+					 this.state.room_name === undefined,
 		})
 	}
 
@@ -147,7 +159,7 @@ class Room extends Component {
 	}
 
 	trackEnded() {
-		//call the firebase http function here
+		//this.setState({current_track: {}})
 		let oReq = new XMLHttpRequest();
 		let url = "https://us-central1-aux-io.cloudfunctions.net/trackEnded"
 		url += `?roomId=${this.roomId}`
@@ -183,8 +195,8 @@ class Room extends Component {
 					<Player
 						url={this.state.current_track.url || ''}
 						//playFromPosition={Date.now() - this.props.startedAt}
-						playFromPosition={0}
-						playStatus="PLAYING"
+						playFromPosition={this.state.playFrom}
+						playStatus={this.state.current_track ? 'PLAYING' : 'STOPPED'}
 						onFinishedPlaying={this.trackEnded}
 					/>
 					<div id="music">
@@ -192,15 +204,11 @@ class Room extends Component {
 							<div id="img-container">
 								<img className="pic"
 									 alt="np_album"
-									 src={this.state.current_track.albumURL || ''}
+									 src={this.state.current_track.albumURL || '../../default.png'}
 								/>
 							</div>
 							<div id="right">
-								<div id="music-info">
-									{this.state.current_track.title}<br/>
-									<small>{this.state.current_track.artist}<br/>{this.state.current_track.album}, {this.state.current_track.year}
-									</small>
-								</div>
+								<MusicInfo {...this.state.current_track}/>
 								<div id="controls">
 									controls
 								</div>
@@ -235,5 +243,19 @@ class Room extends Component {
 	}
 }
 
+function MusicInfo(props) {
+	if (props.title) {
+		return (
+			<div id="music-info">
+				{props.title}<br/>
+				<small>{props.artist}<br/>{props.album}, {props.year}
+				</small>
+			</div>
+		)
+	} else {
+		return <div id="music-info">Nothing at the moment</div>
+	}
+
+}
 
 export default Room

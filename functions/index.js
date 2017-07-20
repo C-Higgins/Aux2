@@ -30,13 +30,16 @@ exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/{sId}').onC
 			const trackUrl = results[0].val()
 			const trackObject = results[1].val()
 
-			const newTrackObject = Object.assign({}, trackObject, {url: trackUrl}, {key: songId})
+			const newTrackObject = Object.assign({}, trackObject, {url: trackUrl}, {key: songId}, {startedAt: Date.now() + 200})
 			console.log('setting track')
 			//otherwise make it play
-			return currentTrackRef.set(newTrackObject).then(() => {
-				console.log('setting timer')
+			return admin.database().ref('room_data/' + roomId).update({
+				current_track: newTrackObject,
+				track_playing: true,
+			}).then(() => {
+				return console.log('setting timer')
 				//and set the timer for its duration
-				return setTimeout(afterSongEnds(roomId), track.val().duration * 1000)
+				//return setTimeout(afterSongEnds(roomId), track.val().duration * 1000)
 			})
 
 		})
@@ -48,60 +51,80 @@ exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/{sId}').onC
 exports.trackEnded = functions.https.onRequest((req, res) => {
 	//if this was called less than 5 seconds ago, ignore it
 	if (TRACK_ENDED_TIMESTAMP >= Date.now() - 5000) {
-		return
+		return res.status(201).send('spam')
 	}
 	TRACK_ENDED_TIMESTAMP = Date.now()
-	console.log('song ended')
-	let roomId = req.roomId
-	const currentTrackRef = admin.database().ref('room_data/' + roomId + '/current_track')
-	return currentTrackRef.once('value').then(ct => {
-		const songId = ct.val().key
-		const p1 = admin.database().ref('room_data/' + roomId + '/songs/' + songId).remove()
-		const p2 = admin.database().ref('song_urls/' + songId).remove()
-		const p3 = admin.database().ref(`song_data/${roomId}/${songId}`).remove()
-		const p4 = currentTrackRef.remove()
-		return Promise.all([p1, p2, p3, p4]).then(() => {
-			console.log('db cleared')
-			// after track ends, start the next one
-			return getNextTrack(roomId).then(nextTrack => {
-				return setCurrentTrack(nextTrack)
-			}).then(() => {
-				console.log('all done')
-				return res.status(200).send()
+
+	let log = admin.database().ref('/logs')
+	var currentTrackRef
+
+	log.update({msg: 'song ended'})
+	cors(req, res, () => {
+		let roomId = req.query.roomId
+		currentTrackRef = admin.database().ref('room_data/' + roomId + '/current_track')
+		return currentTrackRef.once('value').then(ct => {
+			let songId
+			if (ct.val()) { //just in case c_t is null for some reason, we can keep going
+				songId = ct.val().key
+			} else {
+				songId = 0
+			}
+			const p1 = admin.database().ref('room_data/' + roomId + '/songs/' + songId).remove()
+			const p2 = admin.database().ref('song_urls/' + songId).remove()
+			const p3 = admin.database().ref(`song_data/${roomId}/${songId}`).remove()
+			return Promise.all([p1, p2, p3]).then(() => {
+				log.update({msg: 'db cleared'})
+				// after track ends, start the next one
+				return getNextTrack(roomId).then(nextTrack => {
+					return setCurrentTrack(nextTrack)
+				}).then(() => {
+					log.update({msg: 'all done'})
+					return res.status(200).send()
+				})
 			})
-
-			function getNextTrack(roomKey) {
-				console.log('getting next track')
-				return admin.database().ref('song_data/' + roomKey).once('value').then(ss => {
-					if (ss.exists()) {
-						const keys = Object.keys(ss.val())
-						const numberOfSongs = keys.length
-						const rand = Math.floor(Math.random() * numberOfSongs)
-						return mergeTrackWithUrl(ss.val()[keys[rand]], keys[rand])
-					}
-					return null
-				})
-			}
-
-			function setCurrentTrack(trackObject) {
-				console.log('setting next track')
-				if (trackObject) {
-					return currentTrackRef.set(trackObject)
-				}
-				return console.log('track object was null')
-			}
-
-			function mergeTrackWithUrl(trackObject, trackId) {
-				console.log('merging track')
-				return admin.database().ref('song_urls/' + trackId).once('value').then(track => {
-					const trackUrl = track.val()
-					return Object.assign({}, trackObject, {url: trackUrl}, {key: trackId})
-				})
-			}
 		})
 	})
-})
 
+	function getNextTrack(roomKey) {
+		log.update({msg: 'getting next track'})
+		return admin.database().ref('song_data/' + roomKey).once('value').then(ss => {
+			if (ss.exists()) {
+				const keys = Object.keys(ss.val())
+				const numberOfSongs = keys.length
+				const rand = Math.floor(Math.random() * numberOfSongs)
+				return mergeTrackWithUrl(ss.val()[keys[rand]], keys[rand])
+			}
+			return null
+		})
+	}
+
+	function setCurrentTrack(trackObject) {
+		log.update({msg: 'setting next track'})
+		if (!trackObject) {
+			log.update({msg: 'track object was null'})
+			return currentTrackRef.parent.child('track_playing').set(false).then(() => {
+				return currentTrackRef.set(trackObject)
+			})
+		} else {
+			log.update({msg: 'track object found. setting...'})
+			return currentTrackRef.set(trackObject)
+		}
+
+	}
+
+	function mergeTrackWithUrl(trackObject, trackId) {
+		log.update({msg: 'merging track'})
+		return admin.database().ref('song_urls/' + trackId).once('value').then(track => {
+			const trackUrl = track.val()
+			return Object.assign({}, trackObject, {url: trackUrl}, {key: trackId}, {startedAt: Date.now() + 200})
+		})
+	}
+})
+//var e = new XMLHttpRequest
+//	, t = "https://us-central1-aux-io.cloudfunctions.net/trackEnded";
+//t += "?roomId=" + "-KodKj_Relh6WThCJN4Y",
+//	e.open("GET", t),
+//	e.send()
 
 //
 //exports.afterUpload = functions.storage.object().onChange(event => {
