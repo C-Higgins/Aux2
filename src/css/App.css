@@ -4,6 +4,11 @@
 	box-sizing:         border-box;
 }
 
+.sk-spinner {
+	margin:     auto;
+	margin-top: 30vh;
+}
+
 body {
 	background-color: #eeeeee;
 	font-family:      'Raleway', sans-serif;
@@ -12,8 +17,8 @@ body {
 }
 
 #wrapper {
-	margin:         auto;
-	max-width:      1024px;
+	margin:    auto;
+	max-width: 1128px;
 }
 
 #header-color {
@@ -28,7 +33,7 @@ body {
 #header {
 	height:    120px;
 	width:     100%;
-	max-width: 1024px;
+	max-width: 1128px;
 	position:  fixed;
 	top:       0;
 	z-index:   2;

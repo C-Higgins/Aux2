@@ -5,7 +5,6 @@ const gcs = require('@google-cloud/storage')//(SAC go here);
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-const mm = require('musicmetadata');
 admin.initializeApp(functions.config().firebase);
 let TRACK_ENDED_TIMESTAMP = Date.now()
 

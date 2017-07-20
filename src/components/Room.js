@@ -80,7 +80,7 @@ class Room extends Component {
 						this.fb.child('song_urls/' + key).set(ss.downloadURL)
 						this.fb.child('room_data/' + this.roomId + '/songs/' + key).set(true)
 
-						if (metadata.picture) {
+						if (metadata.picture && metadata.picture[0]) {
 							uploadAlbumTask.then(ss => {
 								this.fb.child('song_data/' + this.roomId + '/' + key + '/albumURL').set(ss.downloadURL)
 							})

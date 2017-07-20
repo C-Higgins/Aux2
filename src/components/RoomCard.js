@@ -39,7 +39,7 @@ class RoomCard extends Component {
 				<div className="img-container">
 					<img className="pic"
 						 alt="np_album"
-						 src={props.current_track && props.current_track.albumURL}
+						 src={(props.current_track && props.current_track.albumURL) || '../../default.png'}
 					/>
 				</div>
 				{infoText}

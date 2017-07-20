@@ -4,7 +4,6 @@ import firebase from "firebase"
 import Lobby from "./Lobby.js"
 import Room from "./Room.js"
 import Modal from "./Modal.js"
-import Spinner from "react-spinkit"
 import {BrowserRouter as Router, Link, Route} from "react-router-dom"
 
 class App extends Component {
@@ -50,25 +49,6 @@ class App extends Component {
 		})
 	}
 
-	componentWillMount() {
-		this.fb.child('rooms').on('value', data => {
-			this.setState({rooms: {...data.val()}})
-			this.setState(ps => ({loaded: ps.loaded + 1}))
-			this.checkDoneLoading()
-		})
-		this.fb.child('room_data').on('value', data => {
-			this.setState({room_data: {...data.val()}})
-			this.setState(ps => ({loaded: ps.loaded + 1}))
-			this.checkDoneLoading()
-		})
-	}
-
-	componentWillUnmount() {
-		this.fb.child('rooms').off()
-		this.fb.child('room_data').off()
-		this.fb.off()
-	}
-
 	checkDoneLoading() {
 		this.setState(ps => {
 			return {loading: ps.loaded < 2} //the number of FB calls
@@ -76,35 +56,18 @@ class App extends Component {
 	}
 
 	render() {
-		if (!this.state.loading) {
-			if (this.state.rooms && this.state.room_data) {
-				var mergedLobbyData = Object.keys(this.state.rooms).map(key => {
-					return Object.assign({},
-						this.state.rooms[key],
-						this.state.room_data[key],
-						{users: Object.keys(this.state.room_data[key].users).length || 0},
-						{key: key}
-					)
-				})
-			} else {
-				mergedLobbyData = []
-			}
+		return (
+			<Router>
+				<div id="wrapper">
+					<Header openModal={() => this.setState({modalOpen: true})}/>
+					<Modal submit={this.createRoom} open={this.state.modalOpen}
+						   close={() => this.setState({modalOpen: false})}/>
+					<Route exact path="/" render={() => <Lobby rooms={null}/>}/>
+					<Route path="/:roomId" component={Room}/>
+				</div>
+			</Router>
+		)
 
-
-			return (
-				<Router>
-					<div id="wrapper">
-						<Header openModal={() => this.setState({modalOpen: true})}/>
-						<Modal submit={this.createRoom} open={this.state.modalOpen}
-							   close={() => this.setState({modalOpen: false})}/>
-						<Route exact path="/" render={() => <Lobby rooms={mergedLobbyData}/>}/>
-						<Route path="/:roomId" component={Room}/>
-					</div>
-				</Router>
-			)
-		} else {
-			return <Spinner name="wave" color="#560e0e" fadeIn="half"/>
-		}
 	}
 }
 
