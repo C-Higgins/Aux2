@@ -7,7 +7,7 @@ import ReactTable from "react-table"
 import Player from "react-sound"
 import Upload from "react-dropzone"
 import Spinner from "react-spinkit"
-import firebase from "firebase"
+import firebase from "../index.js"
 import mm from "musicmetadata"
 import "react-table/react-table.css"
 import "../css/Room.css"
@@ -25,7 +25,8 @@ class Room extends Component {
 			messages:  [],
 		}
 		this.roomId = props.match.params.roomId
-		this.fb = firebase.database().ref();
+		this.db = firebase.database().ref()
+		this.user = firebase.auth().currentUser
 		this.storage = firebase.storage().ref()
 		this.handleUploads = this.handleUploads.bind(this)
 		this.sendChat = this.sendChat.bind(this)
@@ -74,15 +75,15 @@ class Room extends Component {
 
 					uploadSongTask.then(ss => {
 						this.setState({uploading: null})
-						let sRef = this.fb.child('song_data/' + this.roomId).push()
+						let sRef = this.db.child('song_data/' + this.roomId).push()
 						let key = sRef.getKey()
 						sRef.set(songObj)
-						this.fb.child('song_urls/' + key).set(ss.downloadURL)
-						this.fb.child('room_data/' + this.roomId + '/songs/' + key).set(true)
+						this.db.child('song_urls/' + key).set(ss.downloadURL)
+						this.db.child('room_data/' + this.roomId + '/songs/' + key).set(true)
 
 						if (metadata.picture && metadata.picture[0]) {
 							uploadAlbumTask.then(ss => {
-								this.fb.child('song_data/' + this.roomId + '/' + key + '/albumURL').set(ss.downloadURL)
+								this.db.child('song_data/' + this.roomId + '/' + key + '/albumURL').set(ss.downloadURL)
 							})
 						}
 					})
@@ -91,47 +92,54 @@ class Room extends Component {
 		}
 	}
 
+	componentWillMount() {
+		let userRef = this.db.child('room_data/' + this.roomId + '/users/' + this.user.uid)
+		userRef.set({
+			displayName: this.user.displayName
+		})
+		userRef.onDisconnect().remove()
+	}
+
 	componentDidMount() {
 		// Initial public room info
-		this.fb.child('rooms/' + this.roomId).once('value').then(data => {
+		this.db.child('rooms/' + this.roomId).once('value').then(data => {
 			if (data.val() === null) {
 				this.setState({nullPage: true})
 			}
 			this.setState({...data.val()})
-			this.checkDoneLoading()
 		})
 
 		// Track queue changes
-		this.fb.child('room_data/' + this.roomId + '/songs').on('value', data => {
+		this.db.child('room_data/' + this.roomId + '/songs').on('value', data => {
 			if (data.val()) {
 				let songsVar = {}
 				Object.keys(data.val()).forEach(sId => {
-					this.fb.child('song_data/' + this.roomId + '/' + sId).once('value', songD => {
-						this.setState(ps => {
-							return {songs: Object.assign(songsVar, {[sId]: songD.val()})}
-						})
-						this.checkDoneLoading()
+					this.db.child('song_data/' + this.roomId + '/' + sId).once('value', songD => {
+						this.setState({songs: Object.assign(songsVar, {[sId]: songD.val()})})
 					})
 				})
 
 			} else {
 				this.setState({songs: {}})
-				this.checkDoneLoading()
 			}
 
 		})
 
 		// Track current track changes
-		this.fb.child('room_data/' + this.roomId + '/current_track').on('value', ss => {
+		this.db.child('room_data/' + this.roomId + '/current_track').on('value', ss => {
 			if (ss.exists()) {
 				this.setState({playFrom: Math.max(Date.now() - ss.val().startedAt, 0)})
 			}
 			this.setState({current_track: {...ss.val()}})
-			this.checkDoneLoading()
+		})
+
+		// Track users in room
+		this.db.child('room_data/' + this.roomId + '/users').on('value', ss => {
+			this.setState({users: ss.val()})
 		})
 
 		// Listen for new messages
-		this.fb.child('messages/' + this.roomId).limitToLast(100).on('value', data => {
+		this.db.child('messages/' + this.roomId).limitToLast(100).on('value', data => {
 			if (data.val()) {
 				const messages = Object.keys(data.val()).map(key => {
 					return data.val()[key]
@@ -141,21 +149,17 @@ class Room extends Component {
 		})
 	}
 
-	checkDoneLoading() {
-		this.setState({
-			loading: this.state.current_track === undefined ||
-					 this.state.songs === undefined ||
-					 this.state.room_name === undefined,
-		})
+	isDoneLoading() {
+		return this.state.current_track !== undefined &&
+			this.state.songs !== undefined &&
+			this.state.room_name !== undefined &&
+			this.state.users !== undefined
 	}
 
 	componentWillUnmount() {
-		this.fb.child('rooms/' + this.roomId).off()
-		this.fb.child('room_data/' + this.roomId).off()
-		this.fb.child('song_data/' + this.roomId).off()
-		this.fb.child('room_users/' + this.roomId).off()
-		this.fb.child('messages/' + this.roomId).off()
-		this.fb.off()
+		this.db.off()
+		this.db.child('room_data/' + this.roomId + '/users').off()
+		this.db.child('room_data/' + this.roomId + '/users/' + this.user.uid).remove()
 	}
 
 	trackEnded() {
@@ -170,7 +174,7 @@ class Room extends Component {
 	sendChat(message) {
 		let newMsgRef = firebase.database().ref('messages/' + this.roomId).push()
 		newMsgRef.set({
-			author:  'sendchattest',
+			author:  this.user.displayName,
 			message: message,
 		})
 	}
@@ -178,7 +182,7 @@ class Room extends Component {
 
 	render() {
 
-		if (!this.state.loading) {
+		if (this.isDoneLoading()) {
 			let uploadMessage = this.state.uploading ? `Uploading ${this.state.uploading} - ${this.state.progress}%` : 'Upload'
 			if (!!this.state.songs) {
 				var queueData = Object.keys(this.state.songs).map(k => {
@@ -232,12 +236,15 @@ class Room extends Component {
 
 						</Upload>
 					</div>
-					<Chat messages={this.state.messages} sendChat={this.sendChat}/>
+					<Chat
+						messages={this.state.messages}
+						users={this.state.users}
+						sendChat={this.sendChat}/>
 				</div>
 			)
 		} else {
 			return <div id="room-container">
-				<Spinner name="wave" color="#560e0e" fadeIn="half"/>
+				<Spinner name="line-scale" color="#560e0e" fadeIn="half"/>
 			</div>
 		}
 	}

@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component} from "react"
 class Chat extends Component {
 	constructor(props) {
 		super(props)
@@ -46,6 +46,10 @@ class Chat extends Component {
 
 		return (
 			<div id='chat'>
+				<div id="users">
+					<i className="material-icons">group</i>
+					{this.props.users ? Object.keys(this.props.users).length : 0}
+				</div>
 				<div id="chat-messages" ref={(div => {
 					this.messagesDiv = div
 				})}>

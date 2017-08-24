@@ -28,7 +28,7 @@ class Modal extends Component {
 		}
 		return (
 			<div className="modal">
-				<i className="material-icons close" onClick={() => this.props.close()}>pause</i>
+				<i className="material-icons close" onClick={() => this.props.close()}>close</i>
 				<div id="create-room">
 					<label>Name</label><br/>
 					<input type="text" className="copy-box" spellCheck={false} ref={(e => {

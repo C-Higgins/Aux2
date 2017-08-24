@@ -1,6 +1,6 @@
 import React, {Component} from "react"
 import "../css/App.css"
-import firebase from "firebase"
+import firebase from "../index.js"
 import Lobby from "./Lobby.js"
 import Room from "./Room.js"
 import Modal from "./Modal.js"

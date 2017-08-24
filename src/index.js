@@ -13,54 +13,26 @@ var config = {
 	messagingSenderId: "1016618940381"
 };
 firebase.initializeApp(config);
+export default firebase;
+//const fb_db = firebase.database.ref();
+//const fb_storage = firebase.storage().ref();
+
+firebase.auth().signInAnonymously().catch(error => {
+	console.log(error)
+})
+
+firebase.auth().onAuthStateChanged(user => {
+	if (user) {
+		user.updateProfile({
+			displayName: 'Anonymous'
+		}).then(() => {
+			ReactDOM.render(<App/>, document.getElementById('root'));
+
+			//What is this?
+			registerServiceWorker();
+		})
+	}
+})
 
 
-ReactDOM.render(<App/>, document.getElementById('root'));
 
-
-// function buildProps() {
-//     let roomWithEverything, roomWithUsers, roomWithData
-//     return new Promise(resolve => {
-//         let roomsList = new Promise(resolve => {
-//                 fb.child('rooms').once('value', rooms => {
-//                     resolve(rooms.val())
-//                 })
-//             }
-//         )
-//
-//         roomsList.then(roomList => {
-//             Object.keys(roomList).forEach((key) => {
-//                 roomWithData = new Promise(res => {
-//                     fb.child('room_data/' + key).once('value', data => {
-//                         roomList[key] = Object.assign({}, roomList[key], data.val())
-//                         res(roomList[key])
-//                     })
-//                 })
-//
-//                 roomWithUsers = new Promise(res => {
-//                     fb.child('room_users/' + key).once('value', users => {
-//                         roomList[key] = Object.assign({}, roomList[key], {users: users.val()})
-//                         res(roomList[key].users)
-//                     })
-//                 })
-//
-//                 roomWithEverything = new Promise(res => {
-//                     roomWithUsers.then(async users => {
-//                         await Promise.all(Object.keys(users).map(async(key) => {
-//                             await fb.child('users/' + key).once('value', userData => {
-//                                 users[key] = userData.val()
-//                             })
-//                         }));
-//                         res(users)
-//                     })
-//                 })
-//             })
-//             Promise.all([roomWithEverything, roomWithUsers, roomWithData]).then(() => {
-//                 resolve(roomsList)
-//             })
-//         })
-//     })
-// }
-
-
-registerServiceWorker();

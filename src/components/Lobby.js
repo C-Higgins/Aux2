@@ -2,7 +2,7 @@ import React, {Component} from "react"
 import "../css/Lobby.css"
 import RoomCard from "./RoomCard.js"
 import {Link} from "react-router-dom"
-import firebase from "firebase"
+import firebase from "../index.js"
 import Spinner from "react-spinkit"
 
 class Lobby extends Component {
@@ -10,17 +10,16 @@ class Lobby extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {}
-		this.fb = firebase.database().ref();
+		this.fb = firebase.database().ref()
+		this.user = firebase.auth().currentUser
 	}
 
 	componentDidMount() {
 		this.fb.child('rooms').on('value', data => {
 			this.setState({rooms: {...data.val()}})
-			this.setState(ps => ({loaded: ps.loaded + 1}))
 		})
 		this.fb.child('room_data').on('value', data => {
 			this.setState({room_data: {...data.val()}})
-			this.setState(ps => ({loaded: ps.loaded + 1}))
 		})
 	}
 
@@ -31,7 +30,6 @@ class Lobby extends Component {
 	}
 
 	render() {
-
 		if (!this.state.rooms || !this.state.room_data) {
 			return <div id="rooms-container"><Spinner name="line-scale" color="#560e0e" fadeIn="half"/></div>
 		}
@@ -40,7 +38,7 @@ class Lobby extends Component {
 			return Object.assign({},
 				this.state.rooms[key],
 				this.state.room_data[key],
-				{users: Object.keys(this.state.room_data[key].users).length || 0},
+				{users: this.state.room_data[key].users ? Object.keys(this.state.room_data[key].users).length : 0},
 				{key: key}
 			)
 		})

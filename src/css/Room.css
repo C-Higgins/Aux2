@@ -92,14 +92,25 @@
 
 #chat-messages {
 	font:       .8em 'Noto Sans', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, Sans-Serif;
+	border-top: 1px solid #cccccc;
 	color:      #606060;
 	overflow-y: scroll;
 	position:   absolute;
 	bottom:     60px;
-	top:        0;
+	top:        2em;
 	left:       0;
 	padding:    0 10px;
 	width:      100%;
+}
+
+#users {
+	position: absolute;
+	height:   2em;
+	top:      0;
+}
+
+#users i {
+	vertical-align: bottom;
 }
 
 .message {
