@@ -1,7 +1,7 @@
 import React from "react"
 import ReactDOM from "react-dom"
 import App from "./components/App"
-import registerServiceWorker from "./registerServiceWorker"
+//import registerServiceWorker from "./registerServiceWorker"
 import firebase from "firebase"
 
 const config = {
@@ -28,8 +28,8 @@ firebase.auth().onAuthStateChanged(user => {
 		}).then(() => {
 			ReactDOM.render(<App/>, document.getElementById('root'));
 
-			//What is this?
-			registerServiceWorker();
+			//Disabling for now as often changes can break things before reload
+			//registerServiceWorker();
 		})
 	}
 })
