@@ -67,6 +67,7 @@ class Room extends Component {
 					let uploadSongTask = this.storage.child('songs/' + file.name).put(file)
 
 					if (metadata.picture && metadata.picture[0]) {
+						//noinspection ES6ConvertVarToLetConst
 						var uploadAlbumTask = this.storage.child('art/' + file.name + '.' + metadata.picture[0].format).put(metadata.picture[0].data)
 					}
 					uploadSongTask.on('state_changed', ss => {
@@ -185,6 +186,7 @@ class Room extends Component {
 		if (this.isDoneLoading()) {
 			let uploadMessage = this.state.uploading ? `Uploading ${this.state.uploading} - ${this.state.progress}%` : 'Upload'
 			if (!!this.state.songs) {
+				//noinspection ES6ConvertVarToLetConst
 				var queueData = Object.keys(this.state.songs).map(k => {
 					return this.state.songs[k]
 				})
@@ -194,8 +196,6 @@ class Room extends Component {
 
 			return (
 				<div id="room-container">
-					{/*"https://firebasestorage.googleapis.com/v0/b/aux-io.appspot.com/o/02%20She%20Was%20Too%20Good%20To%20Me.mp3?alt=media&token=725d8d47-347e-433c-b81d-049a79511379"
-					 http://d817ypd61vbww.cloudfront.net/sites/default/files/styles/media_responsive_widest/public/tile/image/AbbeyRoad.jpg*/}
 					<Player
 						url={this.state.current_track.url || ''}
 						//playFromPosition={Date.now() - this.props.startedAt}

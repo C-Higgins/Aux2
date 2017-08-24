@@ -1,7 +1,6 @@
 #rooms-container {
 	/*border: 1px solid white;*/
-	margin:          auto;
-	margin-top:      120px;
+	margin:          120px auto auto;
 	max-width:       1128px;
 	position:        relative;
 	display:         flex;
@@ -60,8 +59,7 @@
 
 #create-room {
 	width:       400px;
-	margin:      auto;
-	margin-top:  30px;
+	margin:      30px auto auto;
 	color:       black;
 	font-family: 'Raleway', sans-serif;
 }
@@ -111,8 +109,7 @@
 	max-width:     500px;
 	height:        250px;
 	position:      fixed;
-	margin:        auto;
-	margin-top:    100px;
+	margin:        100px auto auto;
 
 	top:           100px;
 	left:          0;
@@ -122,7 +119,7 @@
 	background:    white;
 	text-align:    left;
 	border-radius: 2%;
-	box-shadow:    #606060 0px 0px 80px 15px;
+	box-shadow:    #606060 0 0 80px 15px;
 	padding:       20px 10px;
 }
 

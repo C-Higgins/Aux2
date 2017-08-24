@@ -71,7 +71,7 @@ class App extends Component {
 	}
 }
 
-function Header(props) {
+function Header(props) { //move most of this into html
 	return <div id="header">
 		<Link to="/"><span id="aux">Aux</span></Link>
 		<div id="buttons">
