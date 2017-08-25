@@ -136,7 +136,13 @@ class Room extends Component {
 
 		// Track users in room
 		this.db.child('room_data/' + this.roomId + '/users').on('value', ss => {
-			this.setState({users: ss.val()})
+			let users = []
+			if (ss.val() !== null) {
+				users = Object.keys(ss.val()).map(key => {
+					return ss.val()[key].displayName
+				})
+			}
+			this.setState({users: users})
 		})
 
 		// Listen for new messages
@@ -242,9 +248,13 @@ class Room extends Component {
 						sendChat={this.sendChat}/>
 				</div>
 			)
-		} else {
+		} else if (!this.state.nullPage) {
 			return <div id="room-container">
 				<Spinner name="line-scale" color="#560e0e" fadeIn="half"/>
+			</div>
+		} else {
+			return <div id="room-container">
+				invalid page
 			</div>
 		}
 	}

@@ -11,13 +11,7 @@ class App extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
-			loaded:    0,
-			loading:   true,
 			modalOpen: false,
-			rooms:     {},
-			room_data: {
-				users: {}
-			},
 		}
 		this.fb = firebase.database().ref();
 		this.createRoom = this.createRoom.bind(this)

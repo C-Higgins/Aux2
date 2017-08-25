@@ -4,10 +4,12 @@ class Chat extends Component {
 		super(props)
 		this.state = {
 			textareaValue: '',
+			showUsers:     false,
 		}
 
 		this.handleChange = this.handleChange.bind(this)
 		this.checkKey = this.checkKey.bind(this)
+		this.showUsers = this.showUsers.bind(this)
 	}
 
 	handleChange(event) {
@@ -33,6 +35,11 @@ class Chat extends Component {
 		this.props.sendChat(event.target.value);
 	}
 
+	showUsers() {
+		this.setState((ps) => ({showUsers: !ps.showUsers}))
+		this.messagesDiv.scrollTop = this.messagesDiv.scrollHeight
+	}
+
 	render() {
 		const systemStyle = {fontStyle: 'italic'}
 		const messages = this.props.messages.map((message, i) => {
@@ -43,17 +50,28 @@ class Chat extends Component {
 			)
 		})
 
-
+		const userList = this.props.users.map(user => {
+			return <div>{user}</div>
+		})
 		return (
 			<div id='chat'>
-				<div id="users">
-					<i className="material-icons">group</i>
-					{this.props.users ? Object.keys(this.props.users).length : 0}
+				<div id="users-small" className={this.state.showUsers ? 'slide' : ''} onClick={this.showUsers}>
+
+					<i className="material-icons">
+						{this.state.showUsers ? 'arrow_drop_up' : 'arrow_drop_down'}
+					</i>
+					<span style={{position: 'absolute', left: '10px'}}>
+						<i className="material-icons">group</i>
+						{this.props.users.length}
+					</span>
+					<br/>
+					<div id="users-big">{userList}</div>
 				</div>
-				<div id="chat-messages" ref={(div => {
-					this.messagesDiv = div
-				})}>
-					{messages}
+
+				<div id="chat-messages-container">
+					<div id="chat-messages" ref={(div => {
+						this.messagesDiv = div
+					})}>{messages}</div>
 				</div>
 				<textarea value={this.state.textareaValue} onChange={this.handleChange} onKeyDown={this.checkKey}
 						  className="chat-input" type="text"

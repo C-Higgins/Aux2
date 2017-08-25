@@ -29,8 +29,12 @@ class Lobby extends Component {
 		this.fb.off()
 	}
 
+	isLoaded() {
+		return this.state.rooms && this.state.room_data
+	}
+
 	render() {
-		if (!this.state.rooms || !this.state.room_data) {
+		if (!this.isLoaded()) {
 			return <div id="rooms-container"><Spinner name="line-scale" color="#560e0e" fadeIn="half"/></div>
 		}
 

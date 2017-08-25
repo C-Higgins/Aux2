@@ -81,35 +81,77 @@
 }
 
 #chat {
-	width:       300px;
-	flex-shrink: 0;
-	margin-left: 10px;
-	padding:     10px;
-	background:  white;
-	outline:     1px solid #cccccc;
-	position:    relative;
+	display:         flex;
+	flex-direction:  column;
+	justify-content: flex-end;
+	width:           300px;
+	flex-shrink:     0;
+	margin-left:     10px;
+	background:      white;
+	outline:         1px solid #cccccc;
+	position:        relative;
+}
+
+#chat-messages-container {
+	font:       .8em 'Noto Sans', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, Sans-Serif;
+	color:      #606060;
+	flex-grow:  1;
+	width:      100%;
+	position:   relative;
+	border-top: 3px double #cccccc;
 }
 
 #chat-messages {
-	font:       .8em 'Noto Sans', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, Sans-Serif;
-	border-top: 1px solid #cccccc;
-	color:      #606060;
-	overflow-y: scroll;
 	position:   absolute;
-	bottom:     60px;
-	top:        2em;
-	left:       0;
-	padding:    0 10px;
+	bottom:     0;
+	overflow:   auto;
+	max-height: 100%;
 	width:      100%;
+	padding:    0 10px;
 }
 
-#users {
-	position: absolute;
-	height:   2em;
-	top:      0;
+#users-small {
+	flex-shrink:         0;
+	margin-bottom:       2px;
+	cursor:              pointer;
+	-webkit-user-select: none;
+	-moz-user-select:    none;
+	-ms-user-select:     none;
+	user-select:         none;
+	max-height:          1.5em;
+	overflow:            hidden;
+	text-align:          center;
+
+	-webkit-transition:  max-height .25s ease;
+	-moz-transition:     max-height .25s ease;
+	-ms-transition:      max-height .25s ease;
+	-o-transition:       max-height .25s ease;
+	transition:          max-height .25s ease;
 }
 
-#users i {
+#users-small.slide {
+	-webkit-transition: max-height .5s linear;
+	-moz-transition:    max-height .5s linear;
+	-ms-transition:     max-height .5s linear;
+	-o-transition:      max-height .5s linear;
+	transition:         max-height .5s linear;
+	max-height:         12em;
+}
+
+#users-big {
+	overflow:     auto;
+	text-align:   left;
+	padding-left: 10px;
+	max-height:   10.5em;
+	font:         .8em 'Noto Sans', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, Sans-Serif;
+	color:        #606060;
+}
+
+#users-small:hover {
+	color: #560e0e;
+}
+
+#users-small i {
 	vertical-align: bottom;
 }
 
@@ -118,13 +160,10 @@
 }
 
 #chat textarea {
-	position:   absolute;
-	bottom:     0;
-	left:       0;
-	width:      100%;
-	border:     none;
-	border-top: 1px solid #cccccc;
-	resize:     none;
-	height:     60px;
-	padding:    5px;
+	flex-shrink: 0;
+	border:      none;
+	border-top:  1px solid #cccccc;
+	resize:      none;
+	height:      60px;
+	padding:     5px;
 }
