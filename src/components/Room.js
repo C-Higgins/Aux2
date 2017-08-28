@@ -9,6 +9,7 @@ import Upload from "react-dropzone"
 import Spinner from "react-spinkit"
 import firebase from "../index.js"
 import mm from "musicmetadata"
+//import mm from "music-metadata"
 import "react-table/react-table.css"
 import "../css/Room.css"
 
@@ -18,19 +19,19 @@ class Room extends Component {
 		super(props)
 
 		this.state = {
-			uploading: null,
-			progress:  0,
-			loading:   true,
-			loaded:    0,
-			messages:  [],
+			uploading:      null,
+			uploadProgress: 0,
+			loading:        true,
+			loaded:         0,
+			position:       0,
 		}
 		this.roomId = props.match.params.roomId
 		this.db = firebase.database().ref()
 		this.user = firebase.auth().currentUser
 		this.storage = firebase.storage().ref()
 		this.handleUploads = this.handleUploads.bind(this)
-		this.sendChat = this.sendChat.bind(this)
 		this.trackEnded = this.trackEnded.bind(this)
+		this.onPlaying = this.onPlaying.bind(this)
 	}
 
 	static queueColumns = [{
@@ -54,7 +55,7 @@ class Room extends Component {
 		if (accepted.length) {
 			accepted.forEach(file => {
 
-				mm(file, {duration: true}, (err, metadata) => {
+				mm(file, (err, metadata) => {
 					if (err) throw err;
 					const songObj = {
 						album:    metadata.album,
@@ -71,7 +72,7 @@ class Room extends Component {
 						var uploadAlbumTask = this.storage.child('art/' + file.name + '.' + metadata.picture[0].format).put(metadata.picture[0].data)
 					}
 					uploadSongTask.on('state_changed', ss => {
-						this.setState({progress: (100 * ss.bytesTransferred / ss.totalBytes).toFixed(0)})
+						this.setState({uploadProgress: (100 * ss.bytesTransferred / ss.totalBytes).toFixed(0)})
 					})
 
 					uploadSongTask.then(ss => {
@@ -130,46 +131,29 @@ class Room extends Component {
 		this.db.child('room_data/' + this.roomId + '/current_track').on('value', ss => {
 			if (ss.exists()) {
 				this.setState({playFrom: Math.max(Date.now() - ss.val().startedAt, 0)})
+			} else {
+				this.trackEnded()
 			}
 			this.setState({current_track: {...ss.val()}})
-		})
-
-		// Track users in room
-		this.db.child('room_data/' + this.roomId + '/users').on('value', ss => {
-			let users = []
-			if (ss.val() !== null) {
-				users = Object.keys(ss.val()).map(key => {
-					return ss.val()[key].displayName
-				})
-			}
-			this.setState({users: users})
-		})
-
-		// Listen for new messages
-		this.db.child('messages/' + this.roomId).limitToLast(100).on('value', data => {
-			if (data.val()) {
-				const messages = Object.keys(data.val()).map(key => {
-					return data.val()[key]
-				})
-				this.setState({messages: messages})
-			}
 		})
 	}
 
 	isDoneLoading() {
 		return this.state.current_track !== undefined &&
 			this.state.songs !== undefined &&
-			this.state.room_name !== undefined &&
-			this.state.users !== undefined
+			this.state.room_name !== undefined
 	}
 
 	componentWillUnmount() {
+		clearInterval(this.progressUpdateInterval)
 		this.db.off()
 		this.db.child('room_data/' + this.roomId + '/users').off()
 		this.db.child('room_data/' + this.roomId + '/users/' + this.user.uid).remove()
 	}
 
 	trackEnded() {
+		clearInterval(this.progressUpdateInterval)
+		this.progressUpdateInterval = null
 		//this.setState({current_track: {}})
 		let oReq = new XMLHttpRequest();
 		let url = "https://us-central1-aux-io.cloudfunctions.net/trackEnded"
@@ -178,19 +162,28 @@ class Room extends Component {
 		oReq.send();
 	}
 
-	sendChat(message) {
-		let newMsgRef = firebase.database().ref('messages/' + this.roomId).push()
-		newMsgRef.set({
-			author:  this.user.displayName,
-			message: message,
-		})
+
+	onPlaying(smo) {
+		//SM gets duration so we can use that and skip the MM parse for it
+		if (this.state.current_track && !this.state.current_track.duration){
+			this.setState({current_track: Object.assign(this.state.current_track, {duration:smo.duration})})
+		}
+
+		//don't need to update the progress bar constantly
+		if (!this.progressUpdateInterval && this.state.current_track.duration) {
+			this.setState({position: smo.position})
+			this.progressUpdateInterval = setInterval(() => {
+				this.setState({position: smo.position})
+			}, 3000)
+		}
+
 	}
 
 
 	render() {
 
 		if (this.isDoneLoading()) {
-			let uploadMessage = this.state.uploading ? `Uploading ${this.state.uploading} - ${this.state.progress}%` : 'Upload'
+			let uploadMessage = this.state.uploading ? `Uploading ${this.state.uploading} - ${this.state.uploadProgress}%` : 'Upload'
 			if (!!this.state.songs) {
 				//noinspection ES6ConvertVarToLetConst
 				var queueData = Object.keys(this.state.songs).map(k => {
@@ -208,6 +201,7 @@ class Room extends Component {
 						playFromPosition={this.state.playFrom}
 						playStatus={this.state.current_track ? 'PLAYING' : 'STOPPED'}
 						onFinishedPlaying={this.trackEnded}
+						onPlaying={this.onPlaying}
 					/>
 					<div id="music">
 						<div id="now-playing">
@@ -218,7 +212,7 @@ class Room extends Component {
 								/>
 							</div>
 							<div id="right">
-								<MusicInfo {...this.state.current_track}/>
+								<MusicInfo {...this.state.current_track} position={this.state.position}/>
 								<div id="controls">
 									controls
 								</div>
@@ -243,9 +237,8 @@ class Room extends Component {
 						</Upload>
 					</div>
 					<Chat
-						messages={this.state.messages}
-						users={this.state.users}
-						sendChat={this.sendChat}/>
+						roomId={this.roomId}
+						user={this.user}/>
 				</div>
 			)
 		} else if (!this.state.nullPage) {
@@ -261,18 +254,41 @@ class Room extends Component {
 }
 
 function MusicInfo(props) {
+	let line1 = props.title
+	let line2 = props.artist
+	let line3 = <small>{props.album}, {props.year}</small>
 	if (props.title) {
 		return (
 			<div id="music-info">
-				{props.title}<br/>
-				<small>{props.artist}<br/>{props.album}, {props.year}
-				</small>
+				{line1}<br/>
+				{line2}<br/>
+				{line2 && line3}
+
+				<br/>
+				<ProgressBar
+					position={props.position}
+					duration={props.duration}
+				/>
 			</div>
 		)
 	} else {
 		return <div id="music-info">Nothing at the moment</div>
 	}
-
 }
 
+function ProgressBar(props) {
+	//TODO: don't display if not valid
+	let percentage = 0
+	if (props.duration) {
+		percentage = parseInt((props.position / props.duration) * 100, 10)
+	}
+	percentage += '%'
+	return (
+		<div className="progress-bar">
+			<div className="progress-indicator"
+				 style={{left: percentage}}
+			/>
+		</div>
+	)
+}
 export default Room

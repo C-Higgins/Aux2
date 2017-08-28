@@ -1,38 +1,62 @@
 import React, {Component} from "react"
+import firebase from "../index.js"
 class Chat extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
-			textareaValue: '',
-			showUsers:     false,
+			showUsers: false,
+			messages:  [],
+			users:     [],
 		}
 
-		this.handleChange = this.handleChange.bind(this)
+		this.messagesDB = firebase.database().ref('messages/' + this.props.roomId)
 		this.checkKey = this.checkKey.bind(this)
 		this.showUsers = this.showUsers.bind(this)
 	}
 
-	handleChange(event) {
-		this.setState({textareaValue: event.target.value})
-	}
-
-	componentDidUpdate(prevProps) {
-		if (this.props.messages.length > prevProps.messages.length) {
-			this.messagesDiv.scrollTop = this.messagesDiv.scrollHeight
-		}
+	sendChat(message) {
+		let newMsgRef = this.messagesDB.push()
+		newMsgRef.set({
+			author:    this.props.user.displayName,
+			message:   message,
+			timestamp: firebase.database.ServerValue.TIMESTAMP,
+		})
 	}
 
 	componentDidMount() {
 		this.messagesDiv.scrollTop = this.messagesDiv.scrollHeight
+
+		// Listen for new messages
+		this.messagesDB.limitToLast(100).on('value', data => {
+			if (data.val()) {
+				const messages = Object.keys(data.val()).map(key => {
+					return data.val()[key]
+				})
+				this.setState({messages: messages}, () => {
+					this.messagesDiv.scrollTop = this.messagesDiv.scrollHeight
+				})
+
+			}
+		})
+
+		// Track users in room
+		firebase.database().ref('room_data/' + this.props.roomId + '/users').on('value', ss => {
+			let users = []
+			if (ss.val() !== null) {
+				users = Object.keys(ss.val()).map(key => {
+					return ss.val()[key].displayName
+				})
+			}
+			this.setState({users: users})
+		})
 	}
 
 
 	checkKey(event) {
-		if (event.keyCode !== 13) return;
+		if (event.keyCode !== 13 || event.target.value === '') return;
 		event.preventDefault();
-		if (event.target.value === '') return;
-		this.setState({textareaValue: ''});
-		this.props.sendChat(event.target.value);
+		this.sendChat(event.target.value);
+		this.textArea.value = '';
 	}
 
 	showUsers() {
@@ -42,16 +66,16 @@ class Chat extends Component {
 
 	render() {
 		const systemStyle = {fontStyle: 'italic'}
-		const messages = this.props.messages.map((message, i) => {
+		const messages = this.state.messages.map((message) => {
 			return (
-				<p className='message' key={i} style={message.system ? systemStyle : null}>
+				<p className='message' key={message.timestamp} style={message.system ? systemStyle : null}>
 					{message.author && <strong>{message.author}:</strong>}<br/>{message.message}
 				</p>
 			)
 		})
 
-		const userList = this.props.users.map(user => {
-			return <div>{user}</div>
+		const userList = this.state.users.map((user, i) => {
+			return <div key={i}>{user}</div>
 		})
 		return (
 			<div id='chat'>
@@ -62,7 +86,7 @@ class Chat extends Component {
 					</i>
 					<span style={{position: 'absolute', left: '10px'}}>
 						<i className="material-icons">group</i>
-						{this.props.users.length}
+						{this.state.users.length}
 					</span>
 					<br/>
 					<div id="users-big">{userList}</div>
@@ -73,9 +97,14 @@ class Chat extends Component {
 						this.messagesDiv = div
 					})}>{messages}</div>
 				</div>
-				<textarea value={this.state.textareaValue} onChange={this.handleChange} onKeyDown={this.checkKey}
-						  className="chat-input" type="text"
-						  placeholder="Chat..."/>
+				<textarea
+					onKeyDown={this.checkKey}
+					className="chat-input" type="text"
+					placeholder="Chat..."
+					ref={textarea => {
+						this.textArea = textarea
+					}}
+				/>
 
 			</div>
 		)
