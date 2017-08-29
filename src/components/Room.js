@@ -3,6 +3,7 @@
  */
 import React, {Component} from "react"
 import Chat from "./Chat.js"
+import ProgressBar from './ProgressBar.js'
 import ReactTable from "react-table"
 import Player from "react-sound"
 import Upload from "react-dropzone"
@@ -51,18 +52,19 @@ class Room extends Component {
 	}]
 
 	//TODO: When uploading multiple files it visually fucks up
+	//TODO: Rewrite to show uploads in queue (like how podcasts download)
 	handleUploads(accepted, rejected) {
 		if (accepted.length) {
 			accepted.forEach(file => {
 
-				mm(file, (err, metadata) => {
+				mm(file, {duration: true}, (err, metadata) => { //need another solution for getting duration
 					if (err) throw err;
 					const songObj = {
 						album:    metadata.album,
 						artist:   metadata.artist[0],
 						title:    metadata.title,
 						year:     metadata.year,
-						duration: metadata.duration,
+						duration: metadata.duration * 1000,
 					}
 					this.setState({uploading: file.name})
 					let uploadSongTask = this.storage.child('songs/' + file.name).put(file)
@@ -165,17 +167,17 @@ class Room extends Component {
 
 	onPlaying(smo) {
 		//SM gets duration so we can use that and skip the MM parse for it
-		if (this.state.current_track && !this.state.current_track.duration){
-			this.setState({current_track: Object.assign(this.state.current_track, {duration:smo.duration})})
+		if (this.state.current_track && !this.state.current_track.duration) {
+			this.setState({current_track: Object.assign(this.state.current_track, {duration: smo.duration})})
 		}
 
 		//don't need to update the progress bar constantly
-		if (!this.progressUpdateInterval && this.state.current_track.duration) {
-			this.setState({position: smo.position})
-			this.progressUpdateInterval = setInterval(() => {
-				this.setState({position: smo.position})
-			}, 3000)
-		}
+		//if (!this.progressUpdateInterval && this.state.current_track.duration) {
+		//	this.setState({position: Date.now() - this.state.current_track.startedAt})
+		//	this.progressUpdateInterval = setInterval(() => {
+		//		this.setState({position: Date.now() - this.state.current_track.startedAt})
+		//	}, 3000)
+		//}
 
 	}
 
@@ -212,7 +214,7 @@ class Room extends Component {
 								/>
 							</div>
 							<div id="right">
-								<MusicInfo {...this.state.current_track} position={this.state.position}/>
+								<MusicInfo {...this.state.current_track}/>
 								<div id="controls">
 									controls
 								</div>
@@ -224,6 +226,7 @@ class Room extends Component {
 							columns={Room.queueColumns}
 							resizable={true}
 							showPaginationBottom={false}
+							//defaultPageSize="30"
 						/>
 						<Upload
 							onDrop={this.handleUploads}
@@ -266,7 +269,7 @@ function MusicInfo(props) {
 
 				<br/>
 				<ProgressBar
-					position={props.position}
+					startedAt={props.startedAt}
 					duration={props.duration}
 				/>
 			</div>
@@ -276,19 +279,4 @@ function MusicInfo(props) {
 	}
 }
 
-function ProgressBar(props) {
-	//TODO: don't display if not valid
-	let percentage = 0
-	if (props.duration) {
-		percentage = parseInt((props.position / props.duration) * 100, 10)
-	}
-	percentage += '%'
-	return (
-		<div className="progress-bar">
-			<div className="progress-indicator"
-				 style={{left: percentage}}
-			/>
-		</div>
-	)
-}
 export default Room

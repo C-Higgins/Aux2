@@ -1,5 +1,6 @@
 import React, {Component} from "react"
 import "../css/Lobby.css"
+import ProgressBar from './ProgressBar.js'
 
 class RoomCard extends Component {
 
@@ -29,7 +30,7 @@ class RoomCard extends Component {
 			</div>
 		} else {
 			infoText = <div className="room-info">
-				<span>{props.users} users just chilling</span><br/>
+				<span>{props.users} users in a quiet room</span><br/>
 			</div>
 		}
 
@@ -42,12 +43,13 @@ class RoomCard extends Component {
 						 src={(props.current_track && props.current_track.albumURL) || '../../default.png'}
 					/>
 				</div>
+				{props.current_track &&
+				<ProgressBar startedAt={props.current_track.startedAt} duration={props.current_track.duration}
+							 width="80"/>}
 				{infoText}
-
 			</div>
 		)
 	}
 }
-
 
 export default RoomCard

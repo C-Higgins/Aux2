@@ -28,17 +28,11 @@ class App extends Component {
 			track_playing: false,
 			current_track: {},
 			songs:         {},
-			users:         {
-				u1: true,
-			}
 		}
 
 		const p1 = this.fb.child('/rooms/' + key).set(newRoom)
 		const p2 = this.fb.child('/room_data/' + key).set(newRoomData)
-		const p3 = this.fb.child('/users/u1/rooms').update({
-			[key]: true,
-		})
-		Promise.all([p1, p2, p3]).then(() => {
+		Promise.all([p1, p2,]).then(() => {
 			window.location = '/' + key;
 		})
 	}
