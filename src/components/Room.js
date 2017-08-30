@@ -25,6 +25,7 @@ class Room extends Component {
 			loading:        true,
 			loaded:         0,
 			position:       0,
+			isPlaying:      false,
 		}
 		this.roomId = props.match.params.roomId
 		this.db = firebase.database().ref()
@@ -132,7 +133,10 @@ class Room extends Component {
 		// Track current track changes
 		this.db.child('room_data/' + this.roomId + '/current_track').on('value', ss => {
 			if (ss.exists()) {
-				this.setState({playFrom: Math.max(Date.now() - ss.val().startedAt, 0)})
+				this.setState({
+					playFrom:  Math.max(Date.now() - ss.val().startedAt, 0),
+					isPlaying: true,
+				})
 			} else {
 				this.trackEnded()
 			}
@@ -154,6 +158,7 @@ class Room extends Component {
 	}
 
 	trackEnded() {
+		this.setState({isPlaying: false})
 		clearInterval(this.progressUpdateInterval)
 		this.progressUpdateInterval = null
 		//this.setState({current_track: {}})
@@ -170,15 +175,6 @@ class Room extends Component {
 		if (this.state.current_track && !this.state.current_track.duration) {
 			this.setState({current_track: Object.assign(this.state.current_track, {duration: smo.duration})})
 		}
-
-		//don't need to update the progress bar constantly
-		//if (!this.progressUpdateInterval && this.state.current_track.duration) {
-		//	this.setState({position: Date.now() - this.state.current_track.startedAt})
-		//	this.progressUpdateInterval = setInterval(() => {
-		//		this.setState({position: Date.now() - this.state.current_track.startedAt})
-		//	}, 3000)
-		//}
-
 	}
 
 
@@ -215,6 +211,10 @@ class Room extends Component {
 							</div>
 							<div id="right">
 								<MusicInfo {...this.state.current_track}/>
+								{this.state.isPlaying && <ProgressBar
+									startedAt={this.state.current_track.startedAt}
+									duration={this.state.current_track.duration}
+								/>}
 								<div id="controls">
 									controls
 								</div>
@@ -236,7 +236,6 @@ class Room extends Component {
 							//docs: https://react-dropzone.js.org/
 						>
 							{uploadMessage}
-
 						</Upload>
 					</div>
 					<Chat
@@ -266,12 +265,6 @@ function MusicInfo(props) {
 				{line1}<br/>
 				{line2}<br/>
 				{line2 && line3}
-
-				<br/>
-				<ProgressBar
-					startedAt={props.startedAt}
-					duration={props.duration}
-				/>
 			</div>
 		)
 	} else {

@@ -43,9 +43,10 @@ class RoomCard extends Component {
 						 src={(props.current_track && props.current_track.albumURL) || '../../default.png'}
 					/>
 				</div>
-				{props.current_track &&
-				<ProgressBar startedAt={props.current_track.startedAt} duration={props.current_track.duration}
-							 width="80"/>}
+				<div className="progress-bar-container-card">
+					{props.current_track &&
+					<ProgressBar startedAt={props.current_track.startedAt} duration={props.current_track.duration}/>}
+				</div>
 				{infoText}
 			</div>
 		)
