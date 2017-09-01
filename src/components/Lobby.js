@@ -35,7 +35,8 @@ class Lobby extends Component {
 
 	render() {
 		if (!this.isLoaded()) {
-			return <div id="rooms-container"><Spinner name="line-scale" color="#560e0e" fadeIn="half"/></div>
+			return <div id="rooms-container"><Spinner name="line-scale" color="#560e0e" fadeIn="half"
+													  className="room-spinner"/></div>
 		}
 
 		const mergedLobbyData = Object.keys(this.state.rooms).map(key => {

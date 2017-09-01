@@ -37,6 +37,12 @@ class Room extends Component {
 	}
 
 	static queueColumns = [{
+		Header:     '',
+		resizeable: false,
+		width:      50,
+		accessor:   'pending',
+		Cell:       props => <div>{props.value &&<Spinner name="circle" noFadeIn={true} className="track-spinner"/>}</div>
+	}, {
 		Header:   'Title',
 		accessor: 'title'
 	}, {
@@ -50,9 +56,6 @@ class Room extends Component {
 		accessor:  'duration',
 		resizable: false,
 		width:     60,
-	}, {
-		Header:   'test',
-		accessor: 'pending',
 	}]
 
 	//TODO: When uploading multiple files it visually fucks up
@@ -94,12 +97,15 @@ class Room extends Component {
 					})
 
 					uploadSongTask.then(ss => {
-						sDataRef.update({pending: false})
-						sPendingRef.remove()
-						sUploadedRef.set(true)
-
 						this.setState({uploading: null})
 						this.db.child('song_urls/' + key).set(ss.downloadURL)
+						.then(() => {
+							sUploadedRef.set(true)
+						})
+						sDataRef.update({pending: false})
+						sPendingRef.remove()
+
+
 						if (uploadAlbumTask) {
 							uploadAlbumTask.then(ss => {
 								this.db.child('song_data/' + this.roomId + '/' + key + '/albumURL').set(ss.downloadURL)
@@ -180,7 +186,6 @@ class Room extends Component {
 		this.setState({isPlaying: false})
 		clearInterval(this.progressUpdateInterval)
 		this.progressUpdateInterval = null
-		//this.setState({current_track: {}})
 		let oReq = new XMLHttpRequest();
 		let url = "https://us-central1-aux-io.cloudfunctions.net/trackEnded"
 		url += `?roomId=${this.roomId}`
@@ -209,6 +214,34 @@ class Room extends Component {
 			} else {
 				queueData = []
 			}
+
+			queueData = [
+				{
+					title:   'test1',
+					time:    300,
+					pending: true,
+				},
+				{
+					title:   'test2',
+					time:    300,
+					pending: false,
+				},
+				{
+					title:   'test3',
+					time:    300,
+					pending: false,
+				},
+				{
+					title:   'test4',
+					time:    300,
+					pending: true,
+				},
+				{
+					title:   'test5',
+					time:    300,
+					pending: true,
+				}
+			]
 
 			return (
 				<div id="room-container">
@@ -245,6 +278,14 @@ class Room extends Component {
 							columns={Room.queueColumns}
 							resizable={true}
 							showPaginationBottom={false}
+							defaultSorted={[
+								{
+									id: 'pending',
+								},
+								{
+									id: 'title'
+								}
+							]}
 							//defaultPageSize="30"
 						/>
 						<Upload
@@ -264,7 +305,7 @@ class Room extends Component {
 			)
 		} else if (!this.state.nullPage) {
 			return <div id="room-container">
-				<Spinner name="line-scale" color="#560e0e" fadeIn="half"/>
+				<Spinner name="line-scale" color="#560e0e" fadeIn="half" className="room-spinner"/>
 			</div>
 		} else {
 			return <div id="room-container">

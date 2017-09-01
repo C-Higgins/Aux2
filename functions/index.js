@@ -67,7 +67,7 @@ exports.trackEnded = functions.https.onRequest((req, res) => {
 			} else {
 				songId = 0
 			}
-			const p1 = admin.database().ref('room_data/' + roomId + '/songs/uploaded' + songId).remove()
+			const p1 = admin.database().ref('room_data/' + roomId + '/songs/uploaded/' + songId).remove()
 			const p2 = admin.database().ref('song_urls/' + songId).remove()
 			const p3 = admin.database().ref(`song_data/${roomId}/${songId}`).remove()
 			return Promise.all([p1, p2, p3]).then(() => {
