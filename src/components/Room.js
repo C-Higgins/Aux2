@@ -50,10 +50,14 @@ class Room extends Component {
 		accessor:  'duration',
 		resizable: false,
 		width:     60,
+	}, {
+		Header:   'test',
+		accessor: 'pending',
 	}]
 
 	//TODO: When uploading multiple files it visually fucks up
 	//TODO: Rewrite to show uploads in queue (like how podcasts download)
+	//TODO: Remove from db when upload cancels
 	handleUploads(accepted, rejected) {
 		if (accepted.length) {
 			accepted.forEach(file => {
@@ -66,27 +70,37 @@ class Room extends Component {
 						title:    metadata.title,
 						year:     metadata.year,
 						duration: metadata.duration * 1000,
+						pending:  true,
 					}
 					this.setState({uploading: file.name})
-					let uploadSongTask = this.storage.child('songs/' + file.name).put(file)
 
+					let sDataRef = this.db.child('song_data/' + this.roomId).push()
+					let key = sDataRef.getKey()
+					sDataRef.set(songObj)
+
+					let sUploadedRef = this.db.child('room_data/' + this.roomId + '/songs/uploaded/' + key)
+					let sPendingRef = this.db.child('room_data/' + this.roomId + '/songs/pending/' + key)
+					sPendingRef.set(true) // Tell the database you're uploading something
+
+					let uploadSongTask = this.storage.child('songs/' + file.name).put(file)
+					let uploadAlbumTask = null
 					if (metadata.picture && metadata.picture[0]) {
 						//noinspection ES6ConvertVarToLetConst
-						var uploadAlbumTask = this.storage.child('art/' + file.name + '.' + metadata.picture[0].format).put(metadata.picture[0].data)
+						uploadAlbumTask = this.storage.child('art/' + file.name + '.' + metadata.picture[0].format).put(metadata.picture[0].data)
 					}
+
 					uploadSongTask.on('state_changed', ss => {
 						this.setState({uploadProgress: (100 * ss.bytesTransferred / ss.totalBytes).toFixed(0)})
 					})
 
 					uploadSongTask.then(ss => {
-						this.setState({uploading: null})
-						let sRef = this.db.child('song_data/' + this.roomId).push()
-						let key = sRef.getKey()
-						sRef.set(songObj)
-						this.db.child('song_urls/' + key).set(ss.downloadURL)
-						this.db.child('room_data/' + this.roomId + '/songs/' + key).set(true)
+						sDataRef.update({pending: false})
+						sPendingRef.remove()
+						sUploadedRef.set(true)
 
-						if (metadata.picture && metadata.picture[0]) {
+						this.setState({uploading: null})
+						this.db.child('song_urls/' + key).set(ss.downloadURL)
+						if (uploadAlbumTask) {
 							uploadAlbumTask.then(ss => {
 								this.db.child('song_data/' + this.roomId + '/' + key + '/albumURL').set(ss.downloadURL)
 							})
@@ -116,9 +130,14 @@ class Room extends Component {
 
 		// Track queue changes
 		this.db.child('room_data/' + this.roomId + '/songs').on('value', data => {
-			if (data.val()) {
+			if (data.val() && (data.val().pending || data.val().uploaded)) {
 				let songsVar = {}
-				Object.keys(data.val()).forEach(sId => {
+				data.val().uploaded && Object.keys(data.val().uploaded).forEach(sId => {
+					this.db.child('song_data/' + this.roomId + '/' + sId).once('value', songD => {
+						this.setState({songs: Object.assign(songsVar, {[sId]: songD.val()})})
+					})
+				})
+				data.val().pending && Object.keys(data.val().pending).forEach(sId => {
 					this.db.child('song_data/' + this.roomId + '/' + sId).once('value', songD => {
 						this.setState({songs: Object.assign(songsVar, {[sId]: songD.val()})})
 					})

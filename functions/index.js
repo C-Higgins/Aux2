@@ -8,7 +8,7 @@ admin.initializeApp(functions.config().firebase);
 let TRACK_ENDED_TIMESTAMP = Date.now()
 
 
-exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/{sId}').onCreate(event => {
+exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{sId}').onCreate(event => {
 	const roomId = event.params.rId
 	const songId = event.params.sId
 	console.log('song created:', songId)
@@ -67,7 +67,7 @@ exports.trackEnded = functions.https.onRequest((req, res) => {
 			} else {
 				songId = 0
 			}
-			const p1 = admin.database().ref('room_data/' + roomId + '/songs/' + songId).remove()
+			const p1 = admin.database().ref('room_data/' + roomId + '/songs/uploaded' + songId).remove()
 			const p2 = admin.database().ref('song_urls/' + songId).remove()
 			const p3 = admin.database().ref(`song_data/${roomId}/${songId}`).remove()
 			return Promise.all([p1, p2, p3]).then(() => {
@@ -85,7 +85,8 @@ exports.trackEnded = functions.https.onRequest((req, res) => {
 
 	function getNextTrack(roomKey) {
 		//log.update({msg: 'getting next track'})
-		return admin.database().ref('song_data/' + roomKey).once('value').then(ss => {
+		return admin.database().ref('song_data/' + roomKey).orderByChild('pending').equalTo(false).once('value')
+		.then(ss => {
 			if (ss.exists()) {
 				const keys = Object.keys(ss.val())
 				const numberOfSongs = keys.length

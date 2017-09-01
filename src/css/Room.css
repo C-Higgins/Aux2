@@ -63,10 +63,11 @@
 }
 
 .progress-bar {
-	height:   7px;
-	width:    100%;
-	border:   1px solid #606060;
-	position: relative;
+	height:      7px;
+	width:       100%;
+	border:      1px solid #606060;
+	position:    relative;
+	flex-shrink: 0;
 
 }
 
