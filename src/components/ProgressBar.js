@@ -18,7 +18,7 @@ class ProgressBar extends Component {
 			return null
 		}
 
-		const percentage = parseInt(((Date.now() - this.props.startedAt) / this.props.duration) * 100, 10) + '%'
+		const percentage = parseInt((Date.now() - this.props.startedAt) / (this.props.duration * 10), 10) + '%'
 		return (
 			<div className="progress-bar">
 				<div className="progress-indicator"

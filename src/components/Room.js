@@ -3,7 +3,7 @@
  */
 import React, {Component} from "react"
 import Chat from "./Chat.js"
-import ProgressBar from './ProgressBar.js'
+import ProgressBar from "./ProgressBar.js"
 import ReactTable from "react-table"
 import Player from "react-sound"
 import Upload from "react-dropzone"
@@ -37,11 +37,12 @@ class Room extends Component {
 	}
 
 	static queueColumns = [{
-		Header:     '',
-		resizeable: false,
-		width:      50,
-		accessor:   'pending',
-		Cell:       props => <div>{props.value &&<Spinner name="circle" noFadeIn={true} className="track-spinner"/>}</div>
+		Header:    null,
+		resizable: false,
+		width:     24,
+		accessor:  'pending',
+		Cell:      props => props.value ? <Spinner name="pulse" fadeIn={'none'} className="track-spinner"/> : null,
+		className: 'pending'
 	}, {
 		Header:   'Title',
 		accessor: 'title'
@@ -63,6 +64,10 @@ class Room extends Component {
 	//TODO: Remove from db when upload cancels
 	handleUploads(accepted, rejected) {
 		if (accepted.length) {
+			const files = accepted.map(file => {
+				return file.name
+			})
+			this.setState({uploading: files.toString()})
 			accepted.forEach(file => {
 
 				mm(file, {duration: true}, (err, metadata) => { //need another solution for getting duration
@@ -72,10 +77,9 @@ class Room extends Component {
 						artist:   metadata.artist[0],
 						title:    metadata.title,
 						year:     metadata.year,
-						duration: metadata.duration * 1000,
+						duration: metadata.duration,
 						pending:  true,
 					}
-					this.setState({uploading: file.name})
 
 					let sDataRef = this.db.child('song_data/' + this.roomId).push()
 					let key = sDataRef.getKey()
@@ -83,6 +87,7 @@ class Room extends Component {
 
 					let sUploadedRef = this.db.child('room_data/' + this.roomId + '/songs/uploaded/' + key)
 					let sPendingRef = this.db.child('room_data/' + this.roomId + '/songs/pending/' + key)
+					sPendingRef.onDisconnect().remove()
 					sPendingRef.set(true) // Tell the database you're uploading something
 
 					let uploadSongTask = this.storage.child('songs/' + file.name).put(file)
@@ -92,10 +97,6 @@ class Room extends Component {
 						uploadAlbumTask = this.storage.child('art/' + file.name + '.' + metadata.picture[0].format).put(metadata.picture[0].data)
 					}
 
-					uploadSongTask.on('state_changed', ss => {
-						this.setState({uploadProgress: (100 * ss.bytesTransferred / ss.totalBytes).toFixed(0)})
-					})
-
 					uploadSongTask.then(ss => {
 						this.setState({uploading: null})
 						this.db.child('song_urls/' + key).set(ss.downloadURL)
@@ -104,6 +105,7 @@ class Room extends Component {
 						})
 						sDataRef.update({pending: false})
 						sPendingRef.remove()
+						sPendingRef.onDisconnect().cancel()
 
 
 						if (uploadAlbumTask) {
@@ -136,16 +138,18 @@ class Room extends Component {
 
 		// Track queue changes
 		this.db.child('room_data/' + this.roomId + '/songs').on('value', data => {
-			if (data.val() && (data.val().pending || data.val().uploaded)) {
-				let songsVar = {}
+			if (data.exists()) {
+				let songs = []
 				data.val().uploaded && Object.keys(data.val().uploaded).forEach(sId => {
 					this.db.child('song_data/' + this.roomId + '/' + sId).once('value', songD => {
-						this.setState({songs: Object.assign(songsVar, {[sId]: songD.val()})})
+						songs.push(songD.val())
+						this.setState({songs: songs})
 					})
 				})
 				data.val().pending && Object.keys(data.val().pending).forEach(sId => {
 					this.db.child('song_data/' + this.roomId + '/' + sId).once('value', songD => {
-						this.setState({songs: Object.assign(songsVar, {[sId]: songD.val()})})
+						songs.push(songD.val())
+						this.setState({songs: songs})
 					})
 				})
 
@@ -205,43 +209,13 @@ class Room extends Component {
 	render() {
 
 		if (this.isDoneLoading()) {
-			let uploadMessage = this.state.uploading ? `Uploading ${this.state.uploading} - ${this.state.uploadProgress}%` : 'Upload'
+			let uploadMessage = this.state.uploading ? `Uploading ${this.state.uploading}...` : 'Upload'
 			if (!!this.state.songs) {
 				//noinspection ES6ConvertVarToLetConst
-				var queueData = Object.keys(this.state.songs).map(k => {
-					return this.state.songs[k]
-				})
+				var queueData = [...this.state.songs]
 			} else {
 				queueData = []
 			}
-
-			queueData = [
-				{
-					title:   'test1',
-					time:    300,
-					pending: true,
-				},
-				{
-					title:   'test2',
-					time:    300,
-					pending: false,
-				},
-				{
-					title:   'test3',
-					time:    300,
-					pending: false,
-				},
-				{
-					title:   'test4',
-					time:    300,
-					pending: true,
-				},
-				{
-					title:   'test5',
-					time:    300,
-					pending: true,
-				}
-			]
 
 			return (
 				<div id="room-container">
@@ -263,7 +237,7 @@ class Room extends Component {
 							</div>
 							<div id="right">
 								<MusicInfo {...this.state.current_track}/>
-								{this.state.isPlaying && <ProgressBar
+								{this.state.current_track.title && <ProgressBar
 									startedAt={this.state.current_track.startedAt}
 									duration={this.state.current_track.duration}
 								/>}
@@ -278,6 +252,7 @@ class Room extends Component {
 							columns={Room.queueColumns}
 							resizable={true}
 							showPaginationBottom={false}
+
 							defaultSorted={[
 								{
 									id: 'pending',
@@ -286,7 +261,13 @@ class Room extends Component {
 									id: 'title'
 								}
 							]}
-							//defaultPageSize="30"
+							noDataText="Upload a song to get started!"
+							getTrProps={(state, rowInfo) => {
+								if (!rowInfo || !rowInfo.row.pending) return true;
+								return {
+									className: 'pending'
+								}
+							}}
 						/>
 						<Upload
 							onDrop={this.handleUploads}

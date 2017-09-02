@@ -35,7 +35,7 @@ exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{s
 				current_track: newTrackObject,
 				track_playing: true,
 			}).then(() => {
-				return console.log('setting timer')
+				return admin.database().ref('room_data/' + roomId + 'songs/uploaded/' + songId).remove()
 				//and set the timer for its duration
 				//return setTimeout(afterSongEnds(roomId), track.val().duration * 1000)
 			})
@@ -119,35 +119,10 @@ exports.trackEnded = functions.https.onRequest((req, res) => {
 		})
 	}
 })
-//var e = new XMLHttpRequest
-//	, t = "https://us-central1-aux-io.cloudfunctions.net/trackEnded";
-//t += "?roomId=" + "-KodKj_Relh6WThCJN4Y",
-//	e.open("GET", t),
-//	e.send()
 
 //
 //exports.afterUpload = functions.storage.object().onChange(event => {
 //	if (event.data.resourceState === 'not_exists') {
 //		return console.log('file deleted')
 //	}
-//	if (!event.data.contentType.startsWith('audio/')) {
-//		return console.log('non audio file uploaded')
-//	}
-//
-//	const object = event.data
-//	const fileBucket = object.bucket; // The Storage bucket that contains the file.
-//	const filePath = object.name; // File path in the bucket.
-//	const fileName = path.basename(filePath) //the file name
-//	const bucket = gcs.bucket(fileBucket);
-//	const tempFilePath = path.join(os.tmpdir(), fileName);
-//
-//	//download the file that was just uploaded
-//	return bucket.file(filePath).download({
-//		destination: tempFilePath
-//	}).then(() => {
-//		console.log('Song downloaded locally to', tempFilePath);
-//		bucket.file(filePath).getSignedUrl({
-// //https://googlecloudplatform.github.io/google-cloud-node/#/docs/storage/1.2.0/storage/file?method=getSignedUrl
-// action:  'read', expires: Date.now() + 86400000, //24 hours }).then(urls => { console.log('setting song url')
-// admin.database().ref('song_urls/' + key).set(urls[0])  //temp: make the uploaded track the current track songObj.url
-// = urls[0] admin.database().ref('room_data/1/current_track/').set() }) }) })
+//}

@@ -95,8 +95,18 @@
 	margin:     10px 0;
 }
 
-.track-spinner{
+.rt-tr.pending {
+	color: #aaaaaa;
+}
 
+.rt-td.pending {
+	padding:     auto !important;
+	padding-top: 5px !important;
+}
+
+.track-spinner div {
+	width:  15px;
+	height: 15px;
 }
 
 .rt-td {
