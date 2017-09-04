@@ -29,7 +29,7 @@
 	align-self: flex-end;
 }
 
-#img-container img {
+img {
 	max-width:  100%;
 	max-height: 100%;
 }
@@ -118,7 +118,7 @@
 }
 
 #upload {
-	/*height:  60px;*/
+	height:  60px;
 	flex:    0 0 60px;
 	outline: 1px solid #cccccc;
 }
@@ -209,4 +209,31 @@
 	resize:      none;
 	height:      60px;
 	padding:     5px;
+}
+
+.img-uploading {
+	display:     flex;
+	align-items: center;
+	height:      100%;
+	width:       100%;
+}
+
+.img-uploading img {
+	opacity:    .4;
+	background: white;
+	padding:    3px 0 3px 3px;
+}
+
+.img-with-overlay {
+	position: relative;
+	height:   100%;
+}
+
+.img-overlay {
+	position:   absolute;
+	top:        12px;
+	left:       12px;
+	bottom:     12px;
+	right:      12px;
+	text-align: center;
 }

@@ -1,4 +1,5 @@
 import React, {Component} from "react"
+import PB from "react-progressbar.js"
 
 class ProgressBar extends Component {
 	//Props: startedAt, duration
@@ -18,13 +19,20 @@ class ProgressBar extends Component {
 			return null
 		}
 
-		const percentage = parseInt((Date.now() - this.props.startedAt) / (this.props.duration * 10), 10) + '%'
+		const percentage = (Date.now() - this.props.startedAt) / (this.props.duration * 1000)
 		return (
-			<div className="progress-bar">
-				<div className="progress-indicator"
-					 style={{width: percentage}}
-				/>
-			</div>
+			<PB.Line
+				progress={percentage}
+				options={
+					{
+						strokeWidth: 1.5,
+						easing:      'easeInOut',
+						color:       '#560e0e',
+						trailColor:  'white',
+						trailWidth:  1.5,
+					}
+				}
+			/>
 		)
 	}
 }
