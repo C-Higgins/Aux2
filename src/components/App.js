@@ -19,12 +19,12 @@ class App extends Component {
 
 	createRoom(name, priv) {
 		console.log(name, priv)
-		let key = this.fb.child('rooms').push().key
-		let newRoom = {
+		const key = this.fb.child('rooms').push().key
+		const newRoom = {
 			room_name: name,
 			private:   priv,
 		}
-		let newRoomData = {
+		const newRoomData = {
 			track_playing: false,
 			current_track: {},
 			songs:         {},

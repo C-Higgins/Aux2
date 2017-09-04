@@ -1,5 +1,7 @@
 import React, {Component} from "react"
 import firebase from "../index.js"
+import '../css/Chat.css'
+
 class Chat extends Component {
 	constructor(props) {
 		super(props)
