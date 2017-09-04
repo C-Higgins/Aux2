@@ -5,22 +5,34 @@ class ProgressBar extends Component {
 	//Props: startedAt, duration
 	constructor(props) {
 		super(props)
-		this.state = {percentage: Math.min((Date.now() - this.props.startedAt) / (this.props.duration * 1000), 1)}
+		this.state = {
+			percentage: Math.min((Date.now() - this.props.startedAt) / (this.props.duration * 1000), 1),
+			done: false,
+		}
 	}
 
 	componentWillMount() {
-		clearInterval(this.tick())
+		this.ticker = setInterval(() => {
+			this.tick()
+		}, 3000)
+	}
+
+	componentWillReceiveProps(np){
+		this.setState({done:false})
+		clearInterval(this.ticker)
 		this.ticker = setInterval(() => {
 			this.tick()
 		}, 3000)
 	}
 
 	tick() {
-		if (this.props.startedAt < Date.now()) {
-			var percentage = Math.min((Date.now() - this.props.startedAt) / (this.props.duration * 1000), 1)
-		}
-		if (percentage === 1) {
+		if (this.state.done) {
 			clearInterval(this.ticker)
+			return
+		}
+		const percentage = Math.max(Math.min((Date.now() - this.props.startedAt) / (this.props.duration * 1000), 1), 0)
+		if (percentage === 1){
+			this.setState({done: true})
 		}
 		this.setState({percentage: percentage})
 	}
