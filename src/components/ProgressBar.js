@@ -6,7 +6,7 @@ class ProgressBar extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
-			percentage: Math.min((Date.now() - this.props.startedAt) / (this.props.duration * 1000), 1),
+			percentage: Math.max(Math.min((Date.now() - this.props.startedAt) / (this.props.duration * 1000), 1), 0),
 			done: false,
 		}
 	}
