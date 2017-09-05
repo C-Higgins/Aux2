@@ -1,0 +1,44 @@
+.wrapper.header {
+	display:         flex;
+	justify-content: space-between;
+	align-items:     flex-end;
+	height:          100%;
+}
+
+#header {
+	height:           110px;
+	width:            100vw;
+	position:         fixed;
+	left:             0;
+	top:              0;
+	z-index:          2;
+	color:            #eeeeee;
+	background-color: #560e0e
+}
+
+#aux {
+	font:           110px 'Poiret One', sans-serif;
+	line-height:    82px;
+	letter-spacing: -5px;
+	color:          #eeeeee;
+	position:       absolute;
+	bottom:         0;
+	margin-left:    10px;
+}
+
+#buttons {
+	position: relative;
+	bottom:   0;
+	right:    30px;
+}
+
+.lobby-button {
+	margin-left: auto;
+	font-size:   22px;
+	cursor:      pointer;
+	padding:     10px;
+}
+
+i:hover {
+
+}

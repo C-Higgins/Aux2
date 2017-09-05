@@ -1,72 +1,22 @@
-import React, {Component} from "react"
+import React from "react"
+import {BrowserRouter as Router, Route} from "react-router-dom"
+import Header from './Header'
+import AsyncComponent from './AsyncComponent'
 import "../css/App.css"
-import firebase from "../index.js"
-import Lobby from "./Lobby.js"
-import Room from "./Room.js"
-import Modal from "./Modal.js"
-import {BrowserRouter as Router, Link, Route} from "react-router-dom"
 
-class App extends Component {
+const LobbyAsync = (props) => <AsyncComponent load={import('./Lobby.js')} {...props}/>
+const RoomAsync = (props) => <AsyncComponent load={import('./Room.js')} {...props}/>
 
-	constructor(props) {
-		super(props)
-		this.state = {
-			modalOpen: false,
-		}
-		this.fb = firebase.database().ref();
-		this.createRoom = this.createRoom.bind(this)
-	}
-
-	createRoom(name, priv) {
-		console.log(name, priv)
-		const key = this.fb.child('rooms').push().key
-		const newRoom = {
-			room_name: name,
-			private:   priv,
-		}
-		const newRoomData = {
-			track_playing: false,
-			current_track: {},
-			songs:         {},
-		}
-
-		const p1 = this.fb.child('/rooms/' + key).set(newRoom)
-		const p2 = this.fb.child('/room_data/' + key).set(newRoomData)
-		Promise.all([p1, p2,]).then(() => {
-			window.location = '/' + key;
-		})
-	}
-
-	checkDoneLoading() {
-		this.setState(ps => {
-			return {loading: ps.loaded < 2} //the number of FB calls
-		})
-	}
-
-	render() {
-		return (
-			<Router>
-				<div id="wrapper">
-					<Header openModal={() => this.setState({modalOpen: true})}/>
-					<Modal submit={this.createRoom} open={this.state.modalOpen}
-						   close={() => this.setState({modalOpen: false})}/>
-					<Route exact path="/" render={() => <Lobby rooms={null}/>}/>
-					<Route path="/:roomId" component={Room}/>
-				</div>
-			</Router>
-		)
-
-	}
-}
-
-function Header(props) { //move most of this into html
-	return <div id="header">
-		<Link to="/"><span id="aux">Aux</span></Link>
-		<div id="buttons">
-			<div id="create-button" className="lobby-button" onClick={props.openModal}>---></div>
-			<div id="button2" className="lobby-button">--></div>
-		</div>
-	</div>
+const App = (props) => {
+	return (
+		<Router>
+			<div className="wrapper">
+				<Header/>
+				<Route exact path="/" component={LobbyAsync}/>
+				<Route path="/:roomId" component={RoomAsync}/>
+			</div>
+		</Router>
+	)
 }
 
 export default App;

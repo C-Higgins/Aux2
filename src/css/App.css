@@ -15,56 +15,9 @@ body {
 	padding:          0;
 }
 
-#wrapper {
+.wrapper {
 	margin:    auto;
 	max-width: 1128px;
-}
-
-#header-color {
-	height:           120px;
-	width:            100%;
-	position:         fixed;
-	top:              0;
-	z-index:          1;
-	background-color: #560e0e;
-}
-
-#header {
-	height:    120px;
-	width:     100%;
-	max-width: 1128px;
-	position:  fixed;
-	top:       0;
-	z-index:   2;
-	color:     #eeeeee;
-}
-
-#aux {
-	font:           110px 'Poiret One', sans-serif;
-	line-height:    82px;
-	letter-spacing: -5px;
-	color:          #eeeeee;
-	position:       absolute;
-	bottom:         0;
-	margin-left:    10px;
-
-}
-
-#buttons {
-	display:         flex;
-	flex-direction:  column;
-	justify-content: space-around;
-	height:          100%;
-	margin-right:    10px;
-}
-
-.lobby-button {
-	width:       100px;
-	height:      33px;
-	line-height: 33px;
-	background:  #eeeeee;
-	margin-left: auto;
-	text-align:  center;
-	box-shadow:  0 3px 10px 0 #555555;
-	font-size:   22px;
+	/*height:    100vh;*/
+	/*position: relative;*/
 }
