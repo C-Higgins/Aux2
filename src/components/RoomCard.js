@@ -1,9 +1,9 @@
 import React, {Component} from "react"
 import "../css/Lobby.css"
+import '../css/ProgressBar.css'
 import ProgressBar from './ProgressBar.js'
 
 class RoomCard extends Component {
-
 
 	render() {
 		if (this.props.private === true) {
@@ -13,24 +13,24 @@ class RoomCard extends Component {
 		}
 	}
 
+	//TODO: Make private rooms look different
 	static Private(props) {
-		//temp
 		let np = {...props}
 		np.room_name = props.room_name + ' [private]'
 		return RoomCard.Public(np)
 	}
 
 	static Public(props) {
-
+		const userCount = props.users ? Object.keys(props.users).length : 0
 		let infoText
 		if (props.current_track) {
 			infoText = <div className="room-info">
-				<span>{props.users} users listening to</span><br/>
+				<span>{userCount} users listening to</span><br/>
 				<span>{props.current_track.title}</span>
 			</div>
 		} else {
 			infoText = <div className="room-info">
-				<span>{props.users} users in a quiet room</span><br/>
+				<span>{userCount} users in a quiet room</span><br/>
 			</div>
 		}
 

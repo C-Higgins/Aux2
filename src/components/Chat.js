@@ -31,9 +31,7 @@ class Chat extends Component {
 		// Listen for new messages
 		this.messagesDB.limitToLast(100).on('value', data => {
 			if (data.val()) {
-				const messages = Object.keys(data.val()).map(key => {
-					return data.val()[key]
-				})
+				const messages = Object.values(data.val())
 				this.setState({messages: messages}, () => {
 					this.messagesDiv.scrollTop = this.messagesDiv.scrollHeight
 				})
@@ -45,8 +43,8 @@ class Chat extends Component {
 		firebase.database().ref('room_data/' + this.props.roomId + '/users').on('value', ss => {
 			let users = []
 			if (ss.val() !== null) {
-				users = Object.keys(ss.val()).map(key => {
-					return ss.val()[key].displayName
+				users = Object.values(ss.val()).map(user => {
+					return user.displayName
 				})
 			}
 			this.setState({users: users})

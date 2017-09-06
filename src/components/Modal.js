@@ -4,25 +4,9 @@
 
 
 import React, {Component} from "react"
-import Checkbox from "./Checkbox.js"
 import '../css/Modal.css'
+
 class Modal extends Component {
-	constructor(props) {
-		super(props)
-		this.state = {
-			private: false
-		}
-
-		this.togglePrivate = this.togglePrivate.bind(this)
-	}
-
-	togglePrivate() {
-		this.setState(ps => ({
-				private: !ps.private
-			}
-		))
-	}
-
 	render() {
 		if (!this.props.open) {
 			return null
@@ -31,18 +15,18 @@ class Modal extends Component {
 			<div className="modal">
 				<i className="material-icons close" onClick={() => this.props.close()}>close</i>
 				<div id="create-room">
-					<label>Name</label><br/>
+					<label>Room Name</label><br/>
 					<input type="text" className="copy-box" spellCheck={false} ref={(e => {
 						this.nameBox = e
 					})}/>
+					<label>Password?</label><br/>
+					<input type="password" placeholder="None" className="copy-box" spellCheck={false} ref={(e => {
+						this.passwordBox = e
+					})}/>
 
-					<div className="col-2" id="modal-buttons">
-						<div>
-							<label>Private?</label><br/>
-							<Checkbox checked={this.state.private} toggle={this.togglePrivate}/>
-						</div>
+					<div id="modal-buttons">
 						<i className="material-icons submit-btn"
-						   onClick={() => this.props.submit(this.nameBox.value, this.state.private)}>
+						   onClick={() => this.props.submit(this.nameBox.value, this.passwordBox.value)}>
 							play_circle_filled
 						</i>
 					</div>

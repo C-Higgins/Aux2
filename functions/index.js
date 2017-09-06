@@ -5,7 +5,7 @@ const cors = require('cors')({origin: true});
 const path = require('path');
 const fs = require('fs');
 admin.initializeApp(functions.config().firebase);
-let TRACK_ENDED_TIMESTAMP = Date.now()
+let TRACK_ENDED_TIMESTAMP = null
 
 
 exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{sId}').onCreate(event => {
@@ -66,9 +66,15 @@ exports.trackEnded = functions.https.onRequest((req, res) => {
 			} else {
 				songId = 0
 			}
+			const oldSongDataRef = admin.database().ref(`song_data/${roomId}/${songId}`)
+			oldSongDataRef.once('value').then(oldSongData => {
+				const historyData = ['title', 'artist', 'album', 'albumURL']
+				.reduce((o, e) => (o[e] = oldSongData[e], o), {});
+				admin.database().ref(`room_data/${roomId}/songs/history/${songId}`).set(historyData)
+			})
 			const p1 = admin.database().ref('room_data/' + roomId + '/songs/uploaded/' + songId).remove()
 			const p2 = admin.database().ref('song_urls/' + songId).remove()
-			const p3 = admin.database().ref(`song_data/${roomId}/${songId}`).remove()
+			const p3 = oldSongDataRef.remove()
 			return Promise.all([p1, p2, p3]).then(() => {
 				//log.update({msg: 'db cleared'})
 				// after track ends, start the next one

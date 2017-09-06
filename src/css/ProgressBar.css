@@ -1,0 +1,26 @@
+.progress-bar-container {
+	position: relative;
+	margin:   auto;
+}
+
+.progress-bar-container-card {
+	position: relative;
+	margin:   auto;
+	width:    80%;
+}
+
+.progress-bar {
+	height:      7px;
+	width:       100%;
+	border:      1px solid #606060;
+	position:    relative;
+	flex-shrink: 0;
+
+}
+
+.progress-indicator {
+	position:         absolute;
+	height:           5px;
+	left:             0;
+	background-color: #560e0e;
+}

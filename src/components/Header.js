@@ -16,11 +16,13 @@ class Header extends React.Component {
 		this.createRoom = this.createRoom.bind(this)
 	}
 
-	createRoom(name, priv) {
+	//TODO: Make passwords do something
+	createRoom(name, password) {
 		const key = this.fb.child('rooms').push().key
 		const newRoom = {
 			room_name: name,
-			private:   priv,
+			private:   !!password,
+			password:  password,
 		}
 		const newRoomData = {
 			track_playing: false,

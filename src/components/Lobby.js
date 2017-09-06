@@ -16,10 +16,10 @@ class Lobby extends Component {
 
 	componentDidMount() {
 		this.fb.child('rooms').on('value', data => {
-			this.setState({rooms: {...data.val()}})
+			this.setState({rooms: data.val()})
 		})
 		this.fb.child('room_data').on('value', data => {
-			this.setState({room_data: {...data.val()}})
+			this.setState({room_data: data.val()})
 		})
 	}
 
@@ -39,24 +39,15 @@ class Lobby extends Component {
 													  className="room-spinner"/></div>
 		}
 
-		const mergedLobbyData = Object.keys(this.state.rooms).map(key => {
-			return Object.assign({},
-				this.state.rooms[key],
-				this.state.room_data[key],
-				{users: this.state.room_data[key].users ? Object.keys(this.state.room_data[key].users).length : 0},
-				{key: key}
+		const roomCards = Object.keys(this.state.rooms).map(key => {
+			return (
+				<Link to={key} key={key}>
+					<RoomCard {...this.state.rooms[key]}
+							  {...this.state.room_data[key]}
+					/>
+				</Link>
 			)
 		})
-
-		let roomCards
-		if (mergedLobbyData) {
-			roomCards = mergedLobbyData.map(r => {
-				return <Link to={r.key} key={r.key}><RoomCard {...r}/></Link>
-			})
-		} else {
-			roomCards = []
-		}
-
 
 		return (
 			<div id="rooms-container">

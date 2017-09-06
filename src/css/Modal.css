@@ -1,39 +1,42 @@
 #create-room {
 	width:       400px;
-	margin:      30px auto auto;
+	margin:      10px auto auto;
 	color:       black;
 	font-family: 'Raleway', sans-serif;
+
 }
 
-.checkbox {
-	height:              50px;
-	width:               50px;
+/*.checkbox {*/
+/*height:              50px;*/
+/*width:               50px;*/
 
-	border:              1px solid #cccccc;
-	color:               #560e0e;
-	background:          #eeeeee;
-	font-size:           50px;
-	text-align:          center;
-	line-height:         50px;
-	cursor:              pointer;
-	-webkit-user-select: none;
-	-moz-user-select:    none;
-	-ms-user-select:     none;
-	user-select:         none;
-}
+/*border:              1px solid #cccccc;*/
+/*color:               #560e0e;*/
+/*background:          #eeeeee;*/
+/*font-size:           50px;*/
+/*text-align:          center;*/
+/*line-height:         50px;*/
+/*cursor:              pointer;*/
+/*-webkit-user-select: none;*/
+/*-moz-user-select:    none;*/
+/*-ms-user-select:     none;*/
+/*user-select:         none;*/
+/*}*/
 
-.checkbox:hover {
-	border: 1px solid #560e0e;
-}
+/*.checkbox:hover {*/
+/*border: 1px solid #560e0e;*/
+/*}*/
 
 .copy-box {
-	width:       100%;
-	font-size:   1.5em;
-	padding:     10px;
-	outline:     1px dashed #cccccc;
-	border:      none;
-	background:  #eeeeee;
-	font-family: inherit;
+	width:         100%;
+	font-size:     1em;
+	padding:       10px;
+	margin-bottom: 10px;
+	outline:       1px dashed #cccccc;
+	border:        none;
+	background:    #eeeeee;
+	font-family:   inherit;
+	text-align:    center;
 }
 
 .copy-box:focus, .copy-box:hover {
@@ -78,11 +81,12 @@
 }
 
 #modal-buttons {
-	margin-top: 30px;
+	margin-top: 10px;
+	text-align: center;
 }
 
 #modal-buttons i {
-	align-self: flex-end;
+	/*align-self: flex-end;*/
 	color:      #cccccc;
 	cursor:     pointer;
 }
@@ -91,7 +95,7 @@
 	color: #560e0e;
 }
 
-.col-2 {
-	display:         flex;
-	justify-content: space-around;
-}
+/*.col-2 {*/
+/*display:         flex;*/
+/*justify-content: space-around;*/
+/*}*/
