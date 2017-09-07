@@ -69,13 +69,18 @@ exports.trackEnded = functions.https.onRequest((req, res) => {
 			const oldSongDataRef = admin.database().ref(`song_data/${roomId}/${songId}`)
 			oldSongDataRef.once('value').then(oldSongData => {
 				const historyData = ['title', 'artist', 'album', 'albumURL']
-				.reduce((o, e) => (o[e] = oldSongData.val()[e], o), {});
+				.reduce((o, e) => {
+					if (oldSongData.val()[e]){
+						o[e] = oldSongData.val()[e]
+					}
+					return o
+				}, {})
 				admin.database().ref(`room_data/${roomId}/songs/history/${songId}`).set(historyData)
+				oldSongDataRef.remove()
 			})
 			const p1 = admin.database().ref('room_data/' + roomId + '/songs/uploaded/' + songId).remove()
 			const p2 = admin.database().ref('song_urls/' + songId).remove()
-			const p3 = oldSongDataRef.remove()
-			return Promise.all([p1, p2, p3]).then(() => {
+			return Promise.all([p1, p2,]).then(() => {
 				//log.update({msg: 'db cleared'})
 				// after track ends, start the next one
 				return getNextTrack(roomId).then(nextTrack => {
