@@ -33,12 +33,7 @@ exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{s
 			return admin.database().ref('room_data/' + roomId).update({
 				current_track: newTrackObject,
 				track_playing: true,
-			}).then(() => {
-				return admin.database().ref('room_data/' + roomId + 'songs/uploaded/' + songId).remove()
-				//and set the timer for its duration
-				//return setTimeout(afterSongEnds(roomId), track.val().duration * 1000)
 			})
-
 		})
 	})
 })
