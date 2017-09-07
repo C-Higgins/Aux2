@@ -1,0 +1,3 @@
+[submodule "Aux-server"]
+	path = Aux-server
+	url = https://github.com/C-Higgins/Aux-server.git
