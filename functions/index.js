@@ -69,7 +69,7 @@ exports.trackEnded = functions.https.onRequest((req, res) => {
 			const oldSongDataRef = admin.database().ref(`song_data/${roomId}/${songId}`)
 			oldSongDataRef.once('value').then(oldSongData => {
 				const historyData = ['title', 'artist', 'album', 'albumURL']
-				.reduce((o, e) => (o[e] = oldSongData[e], o), {});
+				.reduce((o, e) => (o[e] = oldSongData.val()[e], o), {});
 				admin.database().ref(`room_data/${roomId}/songs/history/${songId}`).set(historyData)
 			})
 			const p1 = admin.database().ref('room_data/' + roomId + '/songs/uploaded/' + songId).remove()
