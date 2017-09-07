@@ -256,11 +256,6 @@ class Room extends Component {
 		this.setState({isPlaying: false})
 		clearInterval(this.progressUpdateInterval)
 		this.progressUpdateInterval = null
-		let oReq = new XMLHttpRequest();
-		let url = "https://us-central1-aux-io.cloudfunctions.net/trackEnded"
-		url += `?roomId=${this.roomId}`
-		oReq.open("GET", url);
-		oReq.send();
 	}
 
 	onPlaying(smo) {
