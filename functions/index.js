@@ -58,7 +58,10 @@ exports.voteTracker = functions.database.ref('/room_data/{rId}/users/{uId}/vote'
 })
 
 exports.clearVotes = functions.database.ref('/room_data/{rId}/current_track').onWrite(event => {
-	if (event.data.val().key === event.data.previous.val().key) return;
+	// dont clear it if it's the same track
+	if (event.data.previous.exists() && event.data.exists() && event.data.previous.val().key === event.data.val().key) {
+		return false;
+	}
 	const roomId = event.params.rId
 	const roomVotesRef = admin.database().ref('room_data/' + roomId + '/votes')
 	const usersRef = admin.database().ref(`room_data/${roomId}/users`)

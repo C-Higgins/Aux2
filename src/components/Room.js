@@ -53,7 +53,7 @@ class Room extends Component {
 			isPlaying:     false,
 			infoIsOpen:    window.localStorage.getItem('showInfo'),
 			historyIsOpen: window.localStorage.getItem('showHistory'),
-			volume:        parseInt(window.localStorage.getItem('volume'), 10) || 75,
+			volume:        window.localStorage.getItem('volume') ? parseInt(window.localStorage.getItem('volume'), 10) : 75,
 			votedToSkip:   false,
 			votes:         0,
 		}
