@@ -53,7 +53,7 @@ class Room extends Component {
 			isPlaying:     false,
 			infoIsOpen:    window.localStorage.getItem('showInfo'),
 			historyIsOpen: window.localStorage.getItem('showHistory'),
-			volume:        parseInt(window.localStorage.getItem('volume'), 10),
+			volume:        parseInt(window.localStorage.getItem('volume'), 10) || 75,
 			votedToSkip:   false,
 			votes:         0,
 		}
@@ -234,7 +234,6 @@ class Room extends Component {
 				sPendingRef.remove()
 				sUploadedRef.set(true)
 				sDataRef.update({pending: false})
-				uploadSongTask.off()
 
 				//Turn off disconnection listener
 				sPendingRef.onDisconnect().cancel()
