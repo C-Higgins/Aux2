@@ -28,6 +28,7 @@ class Header extends React.Component {
 			track_playing: false,
 			current_track: {},
 			songs:         {},
+			votes:         0,
 		}
 
 		const p1 = this.fb.child('/rooms/' + key).set(newRoom)

@@ -1,8 +1,8 @@
-import React, {Component} from "react"
+import React, {PureComponent} from "react"
 import firebase from "../index.js"
 import '../css/Chat.css'
 
-class Chat extends Component {
+class Chat extends PureComponent {
 	constructor(props) {
 		super(props)
 		this.state = {

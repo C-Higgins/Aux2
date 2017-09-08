@@ -14,6 +14,10 @@ import "react-table/react-table.css"
 import "../css/Room.css"
 import '../css/ProgressBar.css'
 
+const db = firebase.database()
+const user = firebase.auth().currentUser
+const storage = firebase.storage()
+
 const queueColumns = [{
 	Header:    null,
 	resizable: false,
@@ -45,38 +49,35 @@ class Room extends Component {
 		super(props)
 
 		this.state = {
-			uploading:      null, //Object of uploading track data ref by fb key
-			uploadProgress: 0,
-			loading:        true,
-			loaded:         0,
-			position:       0,
-			isPlaying:      false,
-			infoIsOpen:     window.localStorage.getItem('showInfo'),
-			historyIsOpen:  window.localStorage.getItem('showHistory'),
-			votedToSkip:    false,
+			uploading:     null, //Object of uploading track data ref by fb key
+			isPlaying:     false,
+			infoIsOpen:    window.localStorage.getItem('showInfo'),
+			historyIsOpen: window.localStorage.getItem('showHistory'),
+			volume:        parseInt(window.localStorage.getItem('volume'), 10),
+			votedToSkip:   false,
+			votes:         0,
 		}
 		this.roomId = props.match.params.roomId
-		this.db = firebase.database().ref()
-		this.user = firebase.auth().currentUser
-		this.storage = firebase.storage().ref()
 		this.handleUploads = this.handleUploads.bind(this)
 		this.trackEnded = this.trackEnded.bind(this)
 		this.onPlaying = this.onPlaying.bind(this)
 		this.toggleHistory = this.toggleHistory.bind(this)
 		this.toggleInfo = this.toggleInfo.bind(this)
+		this.toggleVote = this.toggleVote.bind(this)
 		this.onVolumeChange = this.onVolumeChange.bind(this)
 
 
-		let userRef = this.db.child('room_data/' + this.roomId + '/users/' + this.user.uid)
+		let userRef = db.ref('room_data/' + this.roomId + '/users/' + user.uid)
 		userRef.set({
-			displayName: this.user.displayName
+			displayName: user.displayName,
+			vote:        false,
 		})
 		userRef.onDisconnect().remove()
 	}
 
 	componentDidMount() {
 		// Initial public room info
-		this.db.child('rooms/' + this.roomId).once('value').then(data => {
+		db.ref('rooms/' + this.roomId).once('value').then(data => {
 			if (data.val() === null) {
 				this.setState({nullPage: true})
 			}
@@ -85,12 +86,12 @@ class Room extends Component {
 
 		// Track queue changes
 		let time = Date.now()
-		this.db.child('room_data/' + this.roomId + '/songs').on('value', async data => {
+		db.ref('room_data/' + this.roomId + '/songs').on('value', async data => {
 			if (data.exists()) {
 				const newTime = Date.now()
 
 				const songDatas = Object.keys({...data.val().pending, ...data.val().uploaded}).map(sId => {
-					return this.db.child('song_data/' + this.roomId + '/' + sId).once('value').then(ss => ss.val())
+					return db.ref('song_data/' + this.roomId + '/' + sId).once('value').then(ss => ss.val())
 				})
 
 				// Only update with the latest r_d value regardless of how fast the s_d come back
@@ -106,7 +107,7 @@ class Room extends Component {
 		})
 
 		// Track current track changes
-		this.db.child('room_data/' + this.roomId + '/current_track').on('value', ss => {
+		db.ref('room_data/' + this.roomId + '/current_track').on('value', ss => {
 			if (ss.exists()) {
 				this.setState({
 					playFrom:  Math.max(Date.now() - ss.val().startedAt, 0),
@@ -117,13 +118,18 @@ class Room extends Component {
 			}
 			this.setState({current_track: {...ss.val()}})
 		})
+
+		//track votes
+		db.ref(`room_data/${this.roomId}/votes`).on('value', ss => {
+			this.setState({votes: ss.val() || 0})
+		})
 	}
 
 	componentWillUnmount() {
 		clearInterval(this.progressUpdateInterval)
-		this.db.off()
-		this.db.child('room_data/' + this.roomId + '/users').off()
-		this.db.child('room_data/' + this.roomId + '/users/' + this.user.uid).remove()
+		db.off()
+		db.ref('room_data/' + this.roomId + '/users').off()
+		db.ref('room_data/' + this.roomId + '/users/' + user.uid).remove()
 	}
 
 	// ^^^^^^^^^^^ Lifecycles ^^^^^^^^^^^
@@ -134,11 +140,11 @@ class Room extends Component {
 			return false
 		}
 		accepted.forEach(async file => {
-			const metadata = await this.getMetadata(file, {duration: true})
+			const metadata = await getMetadata(file, {duration: true})
 			//need another solution for getting duration
 
 			// Create song key and data
-			const sDataRef = this.db.child('song_data/' + this.roomId).push()
+			const sDataRef = db.ref('song_data/' + this.roomId).push()
 			const key = sDataRef.getKey()
 
 			// set up song db object
@@ -151,21 +157,22 @@ class Room extends Component {
 			}
 
 			sDataRef.set(songObj)
+			sDataRef.onDisconnect().remove()
 
 			// Tell the database you're about to be uploading something
-			const sUploadedRef = this.db.child('room_data/' + this.roomId + '/songs/uploaded/' + key)
-			const sPendingRef = this.db.child('room_data/' + this.roomId + '/songs/pending/' + key)
+			const sUploadedRef = db.ref('room_data/' + this.roomId + '/songs/uploaded/' + key)
+			const sPendingRef = db.ref('room_data/' + this.roomId + '/songs/pending/' + key)
 			sPendingRef.onDisconnect().remove()
 			sPendingRef.set(true)
 
 			// Upload art if there is any
 			if (metadata.picture && metadata.picture[0]) {
 				var dataURL = 'data:image/' + metadata.picture[0].format + ';base64,' +
-					btoa(this.Uint8ToString(metadata.picture[0].data))
-				this.storage.child(`art/${file.name}.${metadata.picture[0].format}`).put(metadata.picture[0].data)
+					btoa(uint8ToString(metadata.picture[0].data))
+				storage.ref(`art/${file.name}.${metadata.picture[0].format}`).put(metadata.picture[0].data)
 				.then(ss =>
 					// Put the art URL into the song data
-					this.db.child(`song_data/${this.roomId}/${key}/albumURL`).set(ss.downloadURL)
+					db.ref(`song_data/${this.roomId}/${key}/albumURL`).set(ss.downloadURL)
 				)
 			}
 
@@ -184,7 +191,7 @@ class Room extends Component {
 			})
 
 			// Start file upload
-			const uploadSongTask = this.storage.child('songs/' + file.name).put(file)
+			const uploadSongTask = storage.ref('songs/' + file.name).put(file)
 
 			// Track the upload status
 			uploadSongTask.on('state_changed', ss => {
@@ -212,7 +219,7 @@ class Room extends Component {
 				})
 
 				// Give the database the URL
-				this.db.child('song_urls/' + key).set(ss.downloadURL)
+				db.ref('song_urls/' + key).set(ss.downloadURL)
 
 				// Tell the db it is no longer pending
 				sPendingRef.remove()
@@ -221,6 +228,7 @@ class Room extends Component {
 
 				//Turn off disconnection listener
 				sPendingRef.onDisconnect().cancel()
+				sDataRef.onDisconnect().cancel()
 			})
 		})
 	}
@@ -236,6 +244,11 @@ class Room extends Component {
 		}
 		window.localStorage.setItem('showHistory', this.state.historyIsOpen ? '' : 1)
 		this.setState(ps => ({historyIsOpen: !ps.historyIsOpen}))
+	}
+
+	toggleVote() {
+		db.ref(`room_data/${this.roomId}/users/${user.uid}/vote`).set(!this.state.votedToSkip)
+		this.setState(ps => ({votedToSkip: !ps.votedToSkip}))
 	}
 
 	onVolumeChange(e) {
@@ -267,26 +280,6 @@ class Room extends Component {
 
 	// ^^^^^^^^^^^ Music events ^^^^^^^^^^^
 
-	// vvvvvvvvvvv Utils vvvvvvvvvvv
-	async getMetadata(file, settings = {}) {
-		const mm = await import('musicmetadata')
-		return new Promise((res, rej) => {
-			mm(file, settings, ((err, metadata) => {
-				err && rej(err)
-				res(metadata)
-			}))
-		})
-	}
-
-	Uint8ToString(u8a){
-		var CHUNK_SZ = 0x8000;
-		var c = [];
-		for (var i=0; i < u8a.length; i+=CHUNK_SZ) {
-			c.push(String.fromCharCode.apply(null, u8a.subarray(i, i+CHUNK_SZ)));
-		}
-		return c.join("");
-	}
-	// ^^^^^^^^^^^ Utils ^^^^^^^^^^^
 	render() {
 		if (this.isDoneLoading()) {
 			let uploadMessage = 'Upload'
@@ -338,13 +331,16 @@ class Room extends Component {
 										   infoIsOpen={this.state.infoIsOpen}
 										   votedToSkip={this.state.votedToSkip}
 								/>
-								{this.state.current_track.title && <ProgressBarMusic
+								{this.state.current_track.duration &&
+								<ProgressBarMusic
 									startedAt={this.state.current_track.startedAt}
 									duration={this.state.current_track.duration}
-								/>}
+								/>
+								}
 								<Controls onChange={this.onVolumeChange}
 										  toggleInfo={this.toggleInfo}
 										  toggleHistory={this.toggleHistory}
+										  toggleVote={this.toggleVote}
 										  volume={window.localStorage.getItem('volume')}
 
 										  historyIsOpen={this.state.historyIsOpen}
@@ -390,7 +386,7 @@ class Room extends Component {
 					</div>
 					<Chat
 						roomId={this.roomId}
-						user={this.user}/>
+						user={user}/>
 				</div>
 			)
 		} else if (!this.state.nullPage) {
@@ -405,6 +401,8 @@ class Room extends Component {
 	}
 }
 
+export default Room
+
 function Controls(props) {
 	const volumeSymbol = props.volume < 20 ? 'volume_mute' : props.volume > 80 ? 'volume_up' : 'volume_down'
 	return (
@@ -417,7 +415,8 @@ function Controls(props) {
 			   onClick={props.toggleHistory}>
 				history
 			</i>
-			<i className="material-icons control">
+			<i className={"material-icons control" + (props.votedToSkip ? ' selected' : '')}
+			   onClick={props.toggleVote}>
 				skip_next
 			</i>
 			<div className="right">
@@ -473,6 +472,26 @@ function MusicInfo(props) {
 
 }
 
+// vvvvvvvvvvv Utils vvvvvvvvvvv
+async function getMetadata(file, settings = {}) {
+	const mm = await import('musicmetadata')
+	return new Promise((res, rej) => {
+		mm(file, settings, ((err, metadata) => {
+			err && rej(err)
+			res(metadata)
+		}))
+	})
+}
+
+function uint8ToString(u8a) {
+	const CHUNK_SZ = 0x8000;
+	let c = [];
+	for (let i = 0; i < u8a.length; i += CHUNK_SZ) {
+		c.push(String.fromCharCode.apply(null, u8a.subarray(i, i + CHUNK_SZ)));
+	}
+	return c.join("");
+}
+
 function formatTime(time) {
 	let minutes = Math.floor(time / 60)
 	let seconds = parseInt(time - (minutes * 60), 10)
@@ -480,4 +499,4 @@ function formatTime(time) {
 	return `${minutes}:${seconds}`
 }
 
-export default Room
+// ^^^^^^^^^^^ Utils ^^^^^^^^^^^

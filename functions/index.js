@@ -5,7 +5,6 @@ const cors = require('cors')({origin: true});
 const path = require('path');
 const fs = require('fs');
 admin.initializeApp(functions.config().firebase);
-let TRACK_ENDED_TIMESTAMP = null
 
 
 exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{sId}').onCreate(event => {
@@ -35,5 +34,36 @@ exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{s
 				track_playing: true,
 			})
 		})
+	})
+})
+
+// The node server will listen for the vote count and skip if warranted
+exports.voteTracker = functions.database.ref('/room_data/{rId}/users/{uId}/vote').onWrite(event => {
+	const roomId = event.params.rId
+	const roomVotesRef = admin.database().ref('room_data/' + roomId + '/votes')
+	return roomVotesRef.once('value').then(roomVotes => {
+		// when a user changes their vote,
+		// if they voted yes, check if it is past the threshold and do stuff
+		// if they vote no, just update the votes number
+		if (!!event.data.val()) { 								//user voted
+			return roomVotesRef.set(roomVotes.val() + 1)
+		} else if (!!event.data.previous.val()) { 	// User rescinded their vote
+			return roomVotesRef.set(roomVotes.val() - 1)
+		}
+	})
+})
+
+exports.clearVotes = functions.database.ref('/room_data/{rId}/current_track').onUpdate(event => {
+	const roomId = event.params.rId
+	const roomVotesRef = admin.database().ref('room_data/' + roomId + '/votes')
+	const usersRef = admin.database().ref(`room_data/${roomId}/users`)
+	return usersRef.once('value').then(users => {
+		if (!users.exists()) return false
+		roomVotesRef.set(0)
+		let updates = {}
+		Object.keys(users.val()).forEach(uId => {
+			updates[uId + '/vote'] = false
+		})
+		return usersRef.update(updates)
 	})
 })

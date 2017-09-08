@@ -1,13 +1,12 @@
-import React, {Component} from "react"
+import React, {PureComponent} from "react"
 import PB from "react-progressbar.js"
 
-class ProgressBar extends Component {
+class ProgressBar extends PureComponent {
 	//Props: startedAt, duration
 	constructor(props) {
 		super(props)
 		this.state = {
-			percentage: Math.max(Math.min((Date.now() - this.props.startedAt) / (this.props.duration * 1000), 1), 0),
-			done: false,
+			percentage: ProgressBar.getPercentage(props.startedAt, props.duration)
 		}
 	}
 
@@ -17,28 +16,31 @@ class ProgressBar extends Component {
 		}, 3000)
 	}
 
-	componentWillReceiveProps(np){
-		this.setState({done:false})
-		clearInterval(this.ticker)
-		this.ticker = setInterval(() => {
-			this.tick()
-		}, 3000)
+	componentWillReceiveProps(np) {
+		if (np.duration !== this.props.duration || np.startedAt !== this.props.startedAt) {
+			clearInterval(this.ticker)
+			this.ticker = setInterval(() => {
+				this.tick()
+			}, 3000)
+		}
+
 	}
 
 	tick() {
-		if (this.state.done) {
+
+		const percentage = ProgressBar.getPercentage(this.props.startedAt, this.props.duration)
+		if (percentage === 1) {
 			clearInterval(this.ticker)
-			return
-		}
-		const percentage = Math.max(Math.min((Date.now() - this.props.startedAt) / (this.props.duration * 1000), 1), 0)
-		if (percentage === 1){
-			this.setState({done: true})
 		}
 		this.setState({percentage: percentage})
 	}
 
 	componentWillUnmount() {
 		clearInterval(this.ticker)
+	}
+
+	static getPercentage(startedAt, duration) {
+		return Math.max(Math.min((Date.now() - startedAt) / (duration * 1000), 1), 0)
 	}
 
 	render() {
