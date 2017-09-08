@@ -161,7 +161,7 @@ class Room extends Component {
 			// Upload art if there is any
 			if (metadata.picture && metadata.picture[0]) {
 				var dataURL = 'data:image/' + metadata.picture[0].format + ';base64,' +
-					btoa(String.fromCharCode.apply(null, metadata.picture[0].data))
+					btoa(this.Uint8ToString(metadata.picture[0].data))
 				this.storage.child(`art/${file.name}.${metadata.picture[0].format}`).put(metadata.picture[0].data)
 				.then(ss =>
 					// Put the art URL into the song data
@@ -276,9 +276,16 @@ class Room extends Component {
 				res(metadata)
 			}))
 		})
-
 	}
 
+	Uint8ToString(u8a){
+		var CHUNK_SZ = 0x8000;
+		var c = [];
+		for (var i=0; i < u8a.length; i+=CHUNK_SZ) {
+			c.push(String.fromCharCode.apply(null, u8a.subarray(i, i+CHUNK_SZ)));
+		}
+		return c.join("");
+	}
 	// ^^^^^^^^^^^ Utils ^^^^^^^^^^^
 	render() {
 		if (this.isDoneLoading()) {
