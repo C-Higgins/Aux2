@@ -47,13 +47,14 @@ exports.voteTracker = functions.database.ref('/room_data/{rId}/users/{uId}/vote'
 		// if they vote no, just update the votes number
 		if (!!event.data.val()) { 								//user voted
 			return roomVotesRef.set(roomVotes.val() + 1)
-		} else if (!!event.data.previous.val()) { 	// User rescinded their vote
+		} else if (!!event.data.previous.val() && roomVotes.val() > 0) { 	// User rescinded their vote
 			return roomVotesRef.set(roomVotes.val() - 1)
 		}
 	})
 })
 
-exports.clearVotes = functions.database.ref('/room_data/{rId}/current_track').onUpdate(event => {
+exports.clearVotes = functions.database.ref('/room_data/{rId}/current_track').onWrite(event => {
+	if (event.data.val().key === event.previous.data.val().key) return;
 	const roomId = event.params.rId
 	const roomVotesRef = admin.database().ref('room_data/' + roomId + '/votes')
 	const usersRef = admin.database().ref(`room_data/${roomId}/users`)

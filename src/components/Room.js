@@ -127,9 +127,10 @@ class Room extends Component {
 
 	componentWillUnmount() {
 		clearInterval(this.progressUpdateInterval)
-		db.off()
-		db.ref('room_data/' + this.roomId + '/users').off()
-		db.ref('room_data/' + this.roomId + '/users/' + user.uid).remove()
+
+		//necessary?
+		//db.ref('room_data/' + this.roomId + '/users').off()
+		//db.ref('room_data/' + this.roomId + '/users/' + user.uid).remove()
 	}
 
 	// ^^^^^^^^^^^ Lifecycles ^^^^^^^^^^^
