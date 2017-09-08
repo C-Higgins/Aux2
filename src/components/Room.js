@@ -67,12 +67,17 @@ class Room extends Component {
 		this.onVolumeChange = this.onVolumeChange.bind(this)
 
 
-		let userRef = db.ref('room_data/' + this.roomId + '/users/' + user.uid)
-		userRef.set({
-			displayName: user.displayName,
-			vote:        false,
+		const userRef = db.ref('room_data/' + this.roomId + '/users/' + user.uid)
+		const connectedRef = firebase.database().ref(".info/connected");
+		connectedRef.on("value", data => {
+			if (data.val() === true) {
+				userRef.set({
+					displayName: user.displayName,
+					vote:        false,
+				})
+				userRef.onDisconnect().remove()
+			}
 		})
-		userRef.onDisconnect().remove()
 	}
 
 	componentDidMount() {
@@ -116,7 +121,7 @@ class Room extends Component {
 			} else if (this.state.current_track) {
 				this.trackEnded()
 			}
-			this.setState({current_track: {...ss.val()}})
+			this.setState({current_track: {...ss.val()}, votedToSkip: false})
 		})
 
 		//track votes
@@ -127,10 +132,13 @@ class Room extends Component {
 
 	componentWillUnmount() {
 		clearInterval(this.progressUpdateInterval)
-
-		//necessary?
+		//necessary? yes
+		//put all the connections in an array or something
 		//db.ref('room_data/' + this.roomId + '/users').off()
-		//db.ref('room_data/' + this.roomId + '/users/' + user.uid).remove()
+		db.ref('room_data/' + this.roomId + '/users/' + user.uid).remove()
+		db.ref('room_data/' + this.roomId + '/songs').off()
+		db.ref('room_data/' + this.roomId + '/current_track').off()
+		db.ref(`room_data/${this.roomId}/votes`).off()
 	}
 
 	// ^^^^^^^^^^^ Lifecycles ^^^^^^^^^^^
@@ -226,6 +234,7 @@ class Room extends Component {
 				sPendingRef.remove()
 				sUploadedRef.set(true)
 				sDataRef.update({pending: false})
+				uploadSongTask.off()
 
 				//Turn off disconnection listener
 				sPendingRef.onDisconnect().cancel()

@@ -46,9 +46,13 @@ exports.voteTracker = functions.database.ref('/room_data/{rId}/users/{uId}/vote'
 		// if they voted yes, check if it is past the threshold and do stuff
 		// if they vote no, just update the votes number
 		if (!!event.data.val()) { 								//user voted
-			return roomVotesRef.set(roomVotes.val() + 1)
+			return roomVotesRef.transaction(currentVotes => {
+				return (currentVotes || 0) + 1
+			})
 		} else if (!!event.data.previous.val() && roomVotes.val() > 0) { 	// User rescinded their vote
-			return roomVotesRef.set(roomVotes.val() - 1)
+			return roomVotesRef.transaction(currentVotes => {
+				return (currentVotes || 0) - 1
+			})
 		}
 	})
 })

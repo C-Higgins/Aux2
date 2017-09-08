@@ -51,6 +51,11 @@ class Chat extends PureComponent {
 		})
 	}
 
+	componentWillUnmount() {
+		this.messagesDB.off()
+		firebase.database().ref('room_data/' + this.props.roomId + '/users').off()
+	}
+
 
 	checkKey(event) {
 		if (event.keyCode !== 13 || event.target.value === '') return;
