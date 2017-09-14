@@ -13,10 +13,10 @@ import ProgressBarUpload from "react-progressbar.js"
 import "react-table/react-table.css"
 import "../css/Room.css"
 import '../css/ProgressBar.css'
+import Song from './SongOOtest'
 
 const db = firebase.database()
 const user = firebase.auth().currentUser
-const storage = firebase.storage()
 
 const queueColumns = [{
 	Header:    null,
@@ -149,95 +149,47 @@ class Room extends Component {
 			return false
 		}
 		accepted.forEach(async file => {
-			const metadata = await getMetadata(file, {duration: true})
-			//need another solution for getting duration
-
-			// Create song key and data
-			const sDataRef = db.ref('song_data/' + this.roomId).push()
-			const key = sDataRef.getKey()
-
-			// set up song db object
-			const {picture, ...songObj} = {
-				...metadata,
-				name:    file.name,
-				artist:  metadata.artist[0],
-				key:     key,
-				pending: true,
-			}
-
-			sDataRef.set(songObj)
-			sDataRef.onDisconnect().remove()
-
-			// Tell the database you're about to be uploading something
-			const sUploadedRef = db.ref('room_data/' + this.roomId + '/songs/uploaded/' + key)
-			const sPendingRef = db.ref('room_data/' + this.roomId + '/songs/pending/' + key)
-			sPendingRef.onDisconnect().remove()
-			sPendingRef.set(true)
-
-			// Upload art if there is any
-			if (metadata.picture && metadata.picture[0]) {
-				var dataURL = 'data:image/' + metadata.picture[0].format + ';base64,' +
-					btoa(uint8ToString(metadata.picture[0].data))
-				storage.ref(`art/${file.name}.${metadata.picture[0].format}`).put(metadata.picture[0].data)
-				.then(ss =>
-					// Put the art URL into the song data
-					db.ref(`song_data/${this.roomId}/${key}/albumURL`).set(ss.downloadURL)
-				)
-			}
+			const song = new Song(file, this.roomId)
+			await song.init()
 
 			// Add to local uploads
-			this.setState(ps => {
-				return {
+			this.setState(ps => (
+				{
 					uploading: {
 						...ps.uploading,
-						[key]: {
+						[song.key]: {
 							totalBytes: file.size,
-							albumURL:   dataURL || '../../default.png',
-							...songObj,
+							albumURL:   song.pictureData || '../../default.png',
+							...song.metadata,
 						}
 					}
 				}
-			})
-
-			// Start file upload
-			const uploadSongTask = storage.ref('songs/' + file.name).put(file)
+			))
 
 			// Track the upload status
-			uploadSongTask.on('state_changed', ss => {
+			song.uploadTask.on('state_changed', ss => {
 				this.setState(ps => {
 					return {
 						uploading: {
 							...ps.uploading,
-							[key]: {...ps.uploading[key], bytesTransferred: ss.bytesTransferred}
+							[song.key]: {...ps.uploading[song.key], bytesTransferred: ss.bytesTransferred}
 						}
 					}
 				})
 			})
 
 			// Once upload is completed...
-			uploadSongTask.then(ss => {
+			song.uploadTask.then(ss => {
 				// Remove it from the uploading state (local)
 				let newState = {}
 				this.setState(ps => {
 					Object.keys(ps.uploading).forEach(_key => {
-						if (_key !== key) {
+						if (_key !== song.key) {
 							newState[_key] = ps.uploading[_key]
 						}
 					})
 					return {uploading: newState}
 				})
-
-				// Give the database the URL
-				db.ref('song_urls/' + key).set(ss.downloadURL)
-
-				// Tell the db it is no longer pending
-				sPendingRef.remove()
-				sUploadedRef.set(true)
-				sDataRef.update({pending: false})
-
-				//Turn off disconnection listener
-				sPendingRef.onDisconnect().cancel()
-				sDataRef.onDisconnect().cancel()
 			})
 		})
 	}
@@ -482,25 +434,6 @@ function MusicInfo(props) {
 }
 
 // vvvvvvvvvvv Utils vvvvvvvvvvv
-async function getMetadata(file, settings = {}) {
-	const mm = await import('musicmetadata')
-	return new Promise((res, rej) => {
-		mm(file, settings, ((err, metadata) => {
-			err && rej(err)
-			res(metadata)
-		}))
-	})
-}
-
-function uint8ToString(u8a) {
-	const CHUNK_SZ = 0x8000;
-	let c = [];
-	for (let i = 0; i < u8a.length; i += CHUNK_SZ) {
-		c.push(String.fromCharCode.apply(null, u8a.subarray(i, i + CHUNK_SZ)));
-	}
-	return c.join("");
-}
-
 function formatTime(time) {
 	let minutes = Math.floor(time / 60)
 	let seconds = parseInt(time - (minutes * 60), 10)
