@@ -29,6 +29,10 @@ exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{s
 			const newTrackObject = Object.assign({}, trackObject.val(), {url: trackUrl.val()}, {key: songId}, {startedAt: Date.now() + 100})
 			console.log('setting track')
 			//otherwise make it play
+			admin.database().ref('rooms/' + roomId).update({
+				current_track: newTrackObject,
+				track_playing: true,
+			})
 			return admin.database().ref('room_data/' + roomId).update({
 				current_track: newTrackObject,
 				track_playing: true,

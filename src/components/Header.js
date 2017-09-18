@@ -19,6 +19,7 @@ class Header extends React.Component {
 	//TODO: Make passwords do something
 	createRoom(name, password) {
 		const key = this.fb.child('rooms').push().key
+		const user = firebase.auth().currentUser
 		const newRoom = {
 			room_name: name,
 			private:   !!password,
@@ -29,8 +30,15 @@ class Header extends React.Component {
 			current_track: {},
 			songs:         {},
 			votes:         0,
+			users:         {
+				[user.uid]: {
+					displayName: user.displayName,
+					vote:        false,
+				}
+			}
 		}
 
+		//TODO: Link to new room without page reload
 		const p1 = this.fb.child('/rooms/' + key).set(newRoom)
 		const p2 = this.fb.child('/room_data/' + key).set(newRoomData)
 		Promise.all([p1, p2,]).then(() => {
@@ -46,8 +54,9 @@ class Header extends React.Component {
 		return <div id="header">
 			{
 				this.state.modalOpen &&
-				<Modal submit={this.createRoom} open={this.state.modalOpen}
-					   close={() => this.setState({modalOpen: false})}/>
+				<Modal submit={this.createRoom}
+					   close={() => this.setState({modalOpen: false})}
+				/>
 			}
 			<div className="wrapper header">
 				<Link to="/"><span id="aux">Aux</span></Link>

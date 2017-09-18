@@ -18,9 +18,6 @@ class Lobby extends Component {
 		this.fb.child('rooms').on('value', data => {
 			this.setState({rooms: data.val()})
 		})
-		this.fb.child('room_data').on('value', data => {
-			this.setState({room_data: data.val()})
-		})
 	}
 
 	componentWillUnmount() {
@@ -30,7 +27,7 @@ class Lobby extends Component {
 	}
 
 	isLoaded() {
-		return this.state.rooms && this.state.room_data
+		return this.state.rooms
 	}
 
 	render() {
@@ -43,7 +40,7 @@ class Lobby extends Component {
 			return (
 				<Link to={key} key={key}>
 					<RoomCard {...this.state.rooms[key]}
-							  {...this.state.room_data[key]}
+
 					/>
 				</Link>
 			)

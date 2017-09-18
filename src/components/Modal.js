@@ -1,16 +1,8 @@
-/**
- * Created by Chris on 7/9/2017.
- */
-
-
 import React, {Component} from "react"
 import '../css/Modal.css'
 
 class Modal extends Component {
 	render() {
-		if (!this.props.open) {
-			return null
-		}
 		return (
 			<div className="modal">
 				<i className="material-icons close" onClick={() => this.props.close()}>close</i>

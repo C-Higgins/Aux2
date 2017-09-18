@@ -4,7 +4,7 @@ const db = firebase.database()
 const storage = firebase.storage()
 
 
-class Song {
+class SongUpload {
 	constructor(file, roomId) {
 		this.file = file
 		this.roomId = roomId
@@ -21,17 +21,36 @@ class Song {
 		}
 	}
 
-	async init() {
+	static async getMetadata(file, settings = {}) {
+		const mm = await import('musicmetadata')
+		return new Promise((res, rej) => {
+			mm(file, settings, ((err, metadata) => {
+				err && rej(err)
+				res(metadata)
+			}))
+		})
+	}
+
+	static uint8ToString(u8a) {
+		const CHUNK_SZ = 0x8000;
+		let c = [];
+		for (let i = 0; i < u8a.length; i += CHUNK_SZ) {
+			c.push(String.fromCharCode.apply(null, u8a.subarray(i, i + CHUNK_SZ)));
+		}
+		return c.join("");
+	}
+
+	async start() {
 		// Start file upload
 		this.uploadTask = storage.ref('songs/' + this.file.name).put(this.file)
 
-		const data = await getMetadata(this.file, {duration: true})
+		const data = await SongUpload.getMetadata(this.file, {duration: true})
 
 		const {picture, ...metadata} = data
 		this.data = metadata
 		this.pictureFile = picture
 		this.pictureData = picture ? 'data:image/' + picture[0].format + ';base64,' +
-			btoa(uint8ToString(picture[0].data)) : null
+			btoa(SongUpload.uint8ToString(picture[0].data)) : null
 
 		const dataRef = db.ref('song_data/' + this.roomId).push()
 		this.key = dataRef.getKey()
@@ -73,23 +92,5 @@ class Song {
 	}
 }
 
-function uint8ToString(u8a) {
-	const CHUNK_SZ = 0x8000;
-	let c = [];
-	for (let i = 0; i < u8a.length; i += CHUNK_SZ) {
-		c.push(String.fromCharCode.apply(null, u8a.subarray(i, i + CHUNK_SZ)));
-	}
-	return c.join("");
-}
 
-async function getMetadata(file, settings = {}) {
-	const mm = await import('musicmetadata')
-	return new Promise((res, rej) => {
-		mm(file, settings, ((err, metadata) => {
-			err && rej(err)
-			res(metadata)
-		}))
-	})
-}
-
-export default Song
+export default SongUpload

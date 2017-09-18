@@ -35,7 +35,6 @@ class Chat extends PureComponent {
 				this.setState({messages: messages}, () => {
 					this.messagesDiv.scrollTop = this.messagesDiv.scrollHeight
 				})
-
 			}
 		})
 

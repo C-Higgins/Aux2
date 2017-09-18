@@ -13,7 +13,7 @@ import ProgressBarUpload from "react-progressbar.js"
 import "react-table/react-table.css"
 import "../css/Room.css"
 import '../css/ProgressBar.css'
-import Song from './SongOOtest'
+import SongUpload from './SongUpload'
 
 const db = firebase.database()
 const user = firebase.auth().currentUser
@@ -149,8 +149,8 @@ class Room extends Component {
 			return false
 		}
 		accepted.forEach(async file => {
-			const song = new Song(file, this.roomId)
-			await song.init()
+			const song = new SongUpload(file, this.roomId)
+			await song.start()
 
 			// Add to local uploads
 			this.setState(ps => (

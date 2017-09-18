@@ -21,7 +21,7 @@ class RoomCard extends Component {
 	}
 
 	static Public(props) {
-		const userCount = props.users ? Object.keys(props.users).length : 0
+		const userCount = 0//props.users ? Object.keys(props.users).length : 0
 		let infoText
 		if (props.current_track) {
 			infoText = <div className="room-info">
