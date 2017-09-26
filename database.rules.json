@@ -3,7 +3,7 @@
 	"room_data": {
 	  "$rid": {
 		".read": "root.child('rooms/'+$rid+'/private').val() != true || data.child('users/'+auth.uid).exists()",
-		".write": false,
+		".write": "!data.exists() && auth != null",
 		"songs": {
 		  ".write": "data.parent().child('users/' + auth.uid).exists()"
 		},
@@ -24,7 +24,10 @@
 	"messages": {
 	  "$rid": {
 		".read": "root.child('rooms/'+$rid+'/private').val() != true || root.child('room_data/' + $rid + '/users/'+auth.uid).exists()",
-		".write": "(root.child('rooms/'+$rid+'/private').val() != true || root.child('room_data/' + $rid + '/users/'+auth.uid).exists()) && !data.exists()"
+		".write": false,
+		"$mid": {
+		  ".write": "(root.child('rooms/'+$rid+'/private').val() != true || root.child('room_data/' + $rid + '/users/'+auth.uid).exists()) && !data.exists()"
+		}
 	  }
 	},
 	"song_data": {
@@ -36,8 +39,8 @@
 	  }
 	},
 	"song_urls": {
-	  ".read": true,
-	  ".write": true
+	  ".read": false,
+	  ".write": "!data.exists()"
 	}
   }
 }

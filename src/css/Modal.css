@@ -1,4 +1,4 @@
-#create-room {
+.modal-body {
 	width:       400px;
 	margin:      10px auto auto;
 	color:       black;
@@ -63,7 +63,8 @@
 	background:    white;
 	text-align:    left;
 	border-radius: 2%;
-	box-shadow:    #606060 0 0 80px 15px;
+	border-top:    10px solid #560e0e;
+	box-shadow:    #606060 0 5px 20px 1px;
 	padding:       20px 10px;
 }
 
@@ -87,8 +88,8 @@
 
 #modal-buttons i {
 	/*align-self: flex-end;*/
-	color:      #cccccc;
-	cursor:     pointer;
+	color:  #cccccc;
+	cursor: pointer;
 }
 
 #modal-buttons i:hover {

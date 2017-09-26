@@ -1,6 +1,7 @@
 import React, {Component} from "react"
 import "../css/Lobby.css"
 import RoomCard from "./RoomCard.js"
+import LoginModal from "./LoginModal"
 import {Link} from "react-router-dom"
 import firebase from "../index.js"
 import Spinner from "react-spinkit"
@@ -9,7 +10,9 @@ class Lobby extends Component {
 
 	constructor(props) {
 		super(props)
-		this.state = {}
+		this.state = {
+			loginModalOpen: false
+		}
 		this.fb = firebase.database().ref()
 		this.user = firebase.auth().currentUser
 	}
@@ -30,6 +33,11 @@ class Lobby extends Component {
 		return this.state.rooms
 	}
 
+	openModal(e) {
+		console.log(e)
+		this.setState({loginModalOpen: true})
+	}
+
 	render() {
 		if (!this.isLoaded()) {
 			return <div id="rooms-container"><Spinner name="line-scale" color="#560e0e" fadeIn="half"
@@ -38,7 +46,7 @@ class Lobby extends Component {
 
 		const roomCards = Object.keys(this.state.rooms).map(key => {
 			if (this.state.rooms[key].private) {
-				return <RoomCard key={key} {...this.state.rooms[key]}/>
+				return <a key={key} onClick={() => this.openModal(key)}> <RoomCard {...this.state.rooms[key]}/> </a>
 			}
 			return (
 				<Link to={key} key={key}>
@@ -51,6 +59,12 @@ class Lobby extends Component {
 
 		return (
 			<div id="rooms-container">
+				{this.state.loginModalOpen &&
+				<LoginModal submit={this.joinRoom}
+							close={() => this.setState({loginModalOpen: false})}
+
+				/>
+				}
 				{roomCards}
 			</div>
 		)

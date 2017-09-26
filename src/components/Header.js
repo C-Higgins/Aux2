@@ -4,7 +4,7 @@ import firebase from "../index.js"
 import {Link} from "react-router-dom"
 import '../css/Header.css'
 
-const Modal = (props) => <AsyncComponent load={import('./Modal')} {...props}/>
+const Modal = (props) => <AsyncComponent load={import('./CreateRoomModal')} {...props}/>
 
 class Header extends React.Component {
 	constructor(props) {
