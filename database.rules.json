@@ -1,44 +1,43 @@
-
 {
   "rules": {
-    "room_data": {
-      "$rid": {
-        ".read": "root.child('rooms/'+$rid+'/private').val() != true || data.child('users/'+auth.uid).exists()",
-        ".write": "!data.exists()",
-        "songs": {
-          ".write": "data.parent().child('users/' + auth.uid).exists()"
-        },
-        "users": {
-          "$uid": {
-            ".write": "(auth.uid === $uid || (!data.exists() || !newData.exists())) && (root.child('rooms/'+$rid+'/private').val() === false || data.parent().child(auth.uid).exists())"
-          }
-        }
-      }
-    },
-    "rooms": {
-      ".read": true,
-      ".write": false,
-      "$rid": {
-        ".write": "!data.exists() && auth != null"
-      }
-    },
-    "messages": {
-      "$rid": {
-        ".read": "root.child('rooms/'+$rid+'/private').val() != true || root.child('room_data/' + $rid + '/users/'+auth.uid).exists()",
-        ".write": "(root.child('rooms/'+$rid+'/private').val() != true || root.child('room_data/' + $rid + '/users/'+auth.uid).exists()) && !data.exists()"
-      }
-    },
-    "song_data": {
-      "$rid": {
-        "$sid": {
-          ".write": "root.child('room_data/' + $rid + '/users/'+auth.uid).exists()",
-          ".read": "root.child('room_data/' + $rid + '/users/'+auth.uid).exists()"
-        }
-      }
-    },
-    "song_urls": {
-      ".read": true,
-      ".write": true
-    }
+	"room_data": {
+	  "$rid": {
+		".read": "root.child('rooms/'+$rid+'/private').val() != true || data.child('users/'+auth.uid).exists()",
+		".write": false,
+		"songs": {
+		  ".write": "data.parent().child('users/' + auth.uid).exists()"
+		},
+		"users": {
+		  "$uid": {
+			".write": "auth.uid === $uid && (root.child('rooms/'+$rid+'/private').val() === false || data.parent().child(auth.uid).exists())"
+		  }
+		}
+	  }
+	},
+	"rooms": {
+	  ".read": true,
+	  ".write": false,
+	  "$rid": {
+		".write": "!data.exists() && auth != null"
+	  }
+	},
+	"messages": {
+	  "$rid": {
+		".read": "root.child('rooms/'+$rid+'/private').val() != true || root.child('room_data/' + $rid + '/users/'+auth.uid).exists()",
+		".write": "(root.child('rooms/'+$rid+'/private').val() != true || root.child('room_data/' + $rid + '/users/'+auth.uid).exists()) && !data.exists()"
+	  }
+	},
+	"song_data": {
+	  "$rid": {
+		"$sid": {
+		  ".write": "root.child('room_data/' + $rid + '/users/'+auth.uid).exists()",
+		  ".read": "root.child('room_data/' + $rid + '/users/'+auth.uid).exists()"
+		}
+	  }
+	},
+	"song_urls": {
+	  ".read": true,
+	  ".write": true
+	}
   }
 }

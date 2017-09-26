@@ -24,6 +24,7 @@ class Header extends React.Component {
 			room_name: name,
 			private:   !!password,
 			password:  password,
+			numUsers:  1,
 		}
 		const newRoomData = {
 			track_playing: false,

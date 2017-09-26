@@ -41,6 +41,15 @@ exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{s
 	})
 })
 
+exports.userCount = functions.database.ref('room_data/{rId}/users').onWrite(event => {
+	const roomId = event.params.rId
+	const usersRef = admin.database().ref('room_data/' + roomId + '/users')
+	return usersRef.once('value').then(users => {
+		const numUsers = users.exists() ? Object.keys(users.val()).length : 0
+		return admin.database().ref(`rooms/${roomId}/numUsers`).set(numUsers)
+	})
+})
+
 // The node server will listen for the vote count and skip if warranted
 exports.voteTracker = functions.database.ref('/room_data/{rId}/users/{uId}/vote').onWrite(event => {
 	const roomId = event.params.rId

@@ -37,6 +37,9 @@ class Lobby extends Component {
 		}
 
 		const roomCards = Object.keys(this.state.rooms).map(key => {
+			if (this.state.rooms[key].private) {
+				return <RoomCard key={key} {...this.state.rooms[key]}/>
+			}
 			return (
 				<Link to={key} key={key}>
 					<RoomCard {...this.state.rooms[key]}

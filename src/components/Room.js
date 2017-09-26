@@ -392,6 +392,7 @@ function Controls(props) {
 }
 
 function MusicInfo(props) {
+	//TODO: Handle all possible conditions of data existing
 	if (props.title) {
 		if (!props.infoIsOpen) {
 			// less info
@@ -410,12 +411,12 @@ function MusicInfo(props) {
 		} else {
 			//more info
 			let line1 = `${props.title} - ${props.artist} `
-			line1 += props.albumartist ? `(${props.albumartist})` : null
+			line1 += props.albumartist ? `(${props.albumartist})` : ''
 			let line2 = `${props.album}, ${props.year}`
 			let line3 = `${formatTime(props.duration)} `
-			line3 += props.track.of ? `Track ${props.track.no}/${props.track.of}, ` : null
-			line3 += props.disk.of ? `Disk ${props.disk.no}/${props.disk.of}. ` : null
-			line3 += props.genre ? `(${props.genre.join('/')})` : null
+			line3 += props.track.of ? `Track ${props.track.no}/${props.track.of}, ` : ''
+			line3 += props.disk.of ? `Disk ${props.disk.no}/${props.disk.of}. ` : ''
+			line3 += props.genre ? `(${props.genre.join('/')})` : ''
 
 			if (props.title) {
 				return (
