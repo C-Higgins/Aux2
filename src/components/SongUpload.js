@@ -49,7 +49,7 @@ class SongUpload {
 		const {picture, ...metadata} = data
 		this.data = metadata
 		this.pictureFile = picture
-		this.pictureData = picture ? 'data:image/' + picture[0].format + ';base64,' +
+		this.pictureData = (picture && picture[0]) ? 'data:image/' + picture[0].format + ';base64,' +
 			btoa(SongUpload.uint8ToString(picture[0].data)) : null
 
 		const dataRef = db.ref('song_data/' + this.roomId).push()
@@ -64,7 +64,7 @@ class SongUpload {
 		sPendingRef.set(true)
 
 		// Upload art if there is any
-		if (this.pictureFile && this.pictureFile[0]) {
+		if (this.pictureData) {
 			storage.ref(`art/${this.name}.${this.pictureFile[0].format}`).put(this.pictureFile[0].data)
 			.then(ss =>
 				// Put the art URL into the song data
