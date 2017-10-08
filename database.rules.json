@@ -3,7 +3,7 @@
 	"room_data": {
 	  "$rid": {
 		".read": "root.child('rooms/'+$rid+'/private').val() != true || data.child('users/'+auth.uid).exists()",
-		".write": false,
+		".write": "!data.exists()",
 		"songs": {
 		  ".write": "data.parent().child('users/' + auth.uid).exists()"
 		},
