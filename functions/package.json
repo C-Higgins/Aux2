@@ -4,8 +4,8 @@
   "dependencies": {
     "@google-cloud/storage": "^1.2.0",
     "cors": "^2.8.4",
-    "firebase-admin": "~4.2.1",
-    "firebase-functions": "^0.5.7",
+    "firebase-admin": "6.3.0",
+    "firebase-functions": "^2.1.0",
     "fs": "0.0.1-security",
     "os": "^0.1.1",
     "path": "^0.12.7"

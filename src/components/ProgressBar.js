@@ -13,7 +13,7 @@ class ProgressBar extends PureComponent {
 	componentWillMount() {
 		this.ticker = setInterval(() => {
 			this.tick()
-		}, 3000)
+		}, 1000)
 	}
 
 	componentWillReceiveProps(np) {
@@ -21,7 +21,7 @@ class ProgressBar extends PureComponent {
 			clearInterval(this.ticker)
 			this.ticker = setInterval(() => {
 				this.tick()
-			}, 3000)
+			}, 1000)
 		}
 
 	}

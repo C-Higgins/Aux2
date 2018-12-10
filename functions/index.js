@@ -4,12 +4,12 @@ const cors = require('cors')({origin: true});
 //const gcs = require('@google-cloud/storage')//(SAC go here);
 const path = require('path');
 const fs = require('fs');
-admin.initializeApp(functions.config().firebase);
+admin.initializeApp();
 
 
-exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{sId}').onCreate(event => {
-	const roomId = event.params.rId
-	const songId = event.params.sId
+exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{sId}').onCreate((data, context) => {
+	const roomId = context.params.rId
+	const songId = context.params.sId
 	console.log('song created:', songId)
 	const currentTrackRef = admin.database().ref('room_data/' + roomId + '/current_track')
 	//check if song is currently playing
@@ -41,8 +41,8 @@ exports.roomHandler = functions.database.ref('/room_data/{rId}/songs/uploaded/{s
 	})
 })
 
-exports.userCount = functions.database.ref('room_data/{rId}/users').onWrite(event => {
-	const roomId = event.params.rId
+exports.userCount = functions.database.ref('room_data/{rId}/users').onWrite((data, context) => {
+	const roomId = context.params.rId
 	const usersRef = admin.database().ref('room_data/' + roomId + '/users')
 	return usersRef.once('value').then(users => {
 		const numUsers = users.exists() ? Object.keys(users.val()).length : 0
@@ -51,18 +51,18 @@ exports.userCount = functions.database.ref('room_data/{rId}/users').onWrite(even
 })
 
 // The node server will listen for the vote count and skip if warranted
-exports.voteTracker = functions.database.ref('/room_data/{rId}/users/{uId}/vote').onWrite(event => {
-	const roomId = event.params.rId
+exports.voteTracker = functions.database.ref('/room_data/{rId}/users/{uId}/vote').onWrite((data, context) => {
+	const roomId = context.params.rId
 	const roomVotesRef = admin.database().ref('room_data/' + roomId + '/votes')
 	return roomVotesRef.once('value').then(roomVotes => {
 		// when a user changes their vote,
 		// if they voted yes, check if it is past the threshold and do stuff
 		// if they vote no, just update the votes number
-		if (!!event.data.val()) { 								//user voted
+		if (!!data.after.val()) { 								//user voted
 			return roomVotesRef.transaction(currentVotes => {
 				return (currentVotes || 0) + 1
 			})
-		} else if (!!event.data.previous.val() && roomVotes.val() > 0) { 	// User rescinded their vote
+		} else if (!!data.before.val() && roomVotes.val() > 0) { 	// User rescinded their vote
 			return roomVotesRef.transaction(currentVotes => {
 				return (currentVotes || 0) - 1
 			})
@@ -70,12 +70,12 @@ exports.voteTracker = functions.database.ref('/room_data/{rId}/users/{uId}/vote'
 	})
 })
 
-exports.clearVotes = functions.database.ref('/room_data/{rId}/current_track').onWrite(event => {
+exports.clearVotes = functions.database.ref('/room_data/{rId}/current_track').onWrite((data, context) => {
 	// dont clear it if it's the same track
-	if (event.data.previous.exists() && event.data.exists() && event.data.previous.val().key === event.data.val().key) {
+	if (data.before.exists() && data.after.exists() && data.before.val().key === data.after.val().key) {
 		return false;
 	}
-	const roomId = event.params.rId
+	const roomId = context.params.rId
 	const roomVotesRef = admin.database().ref('room_data/' + roomId + '/votes')
 	const usersRef = admin.database().ref(`room_data/${roomId}/users`)
 	return usersRef.once('value').then(users => {
