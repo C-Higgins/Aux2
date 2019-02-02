@@ -18,6 +18,9 @@ class Header extends React.Component {
 
 	//TODO: Make passwords do something
 	createRoom(name, password) {
+		if(!name) {
+			return
+		}
 		const key = this.fb.child('rooms').push().key
 		const user = firebase.auth().currentUser
 		const newRoom = {
